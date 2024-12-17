@@ -1,4 +1,4 @@
-Here's an updated README file incorporating the images and details about the 2D metaverse application:
+(In Development)
 
 # 🌐 2D Metaverse Workspace Platform
 
