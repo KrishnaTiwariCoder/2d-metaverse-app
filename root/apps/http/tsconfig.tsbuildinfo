@@ -1,1 +1,1 @@
-{"root":["./src/index.ts","./src/middlewares/authenticate.ts","./src/routes/v1/admin.ts","./src/routes/v1/auth.ts","./src/routes/v1/avatar.ts","./src/routes/v1/elements.ts","./src/routes/v1/index.ts","./src/routes/v1/space.ts","./src/routes/v1/user.ts"],"errors":true,"version":"5.7.2"}
+{"root":["./src/index.ts","./src/middlewares/authenticate.ts","./src/routes/v1/admin.ts","./src/routes/v1/auth.ts","./src/routes/v1/avatar.ts","./src/routes/v1/elements.ts","./src/routes/v1/index.ts","./src/routes/v1/space.ts","./src/routes/v1/user.ts"],"version":"5.7.2"}

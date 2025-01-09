@@ -1,0 +1,20 @@
+{
+  "name": "@repo/database",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "commonjs",
+  "scripts": {
+    "build": "tsc -b"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@types/mongoose": "^5.11.96",
+    "@types/node": "^22.10.5",
+    "mongoose": "^8.9.3",
+    "typescript": "^5.7.3"
+  }
+}
