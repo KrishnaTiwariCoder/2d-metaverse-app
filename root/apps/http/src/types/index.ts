@@ -1,4 +1,3 @@
-import { element } from "@repo/database";
 import z from "zod";
 
 export const signupSchema = z.object({
@@ -18,7 +17,7 @@ export const updateMetadataSchema = z.object({
 
 export const createSpaceSchema = z.object({
   name: z.string(),
-  dimentions: z.string().regex(/^[0-9]{1,4}x[0-9]{1,4}$/),
+  dimensions: z.string().regex(/^[0-9]{1,4}x[0-9]{1,4}$/),
   mapId: z.string(),
 });
 
@@ -33,7 +32,7 @@ export const createElementSchema = z.object({
   imageUrl: z.string(),
   height: z.number(),
   width: z.number(),
-  static: z.boolean(),
+  statics: z.boolean(),
 });
 
 export const updateElementSchema = z.object({
@@ -53,3 +52,22 @@ export const createMapSchema = z.object({
     z.object({ elementId: z.string(), x: z.number(), y: z.number() })
   ),
 });
+
+declare global {
+  namespace Express {
+    export interface Request {
+      user: {
+        username: string;
+        type: string;
+        avatarId: string;
+        spaces: string[];
+        elements: string[];
+        maps: string[];
+        createdAt: Date;
+        updatedAt: Date;
+        _id: string;
+        __v: number;
+      };
+    }
+  }
+}

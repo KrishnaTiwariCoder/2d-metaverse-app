@@ -39,14 +39,19 @@ const mapSchema = new mongoose.Schema(
     name: { type: String, required: true },
     width: { type: Number, required: true },
     height: { type: Number, required: true },
+    thumbnail: { type: String, required: true },
     elements: [
       {
         id: { type: mongoose.Schema.Types.ObjectId, ref: "Element" },
         x: Number,
         y: Number,
+        statics: Boolean,
       },
     ],
-    thumbnail: { type: String, required: true },
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
   },
   { timestamps: true }
 );
@@ -65,6 +70,7 @@ const spaceSchema = new mongoose.Schema(
         id: { type: mongoose.Schema.Types.ObjectId, ref: "Element" },
         x: Number,
         y: Number,
+        statics: Boolean,
       },
     ],
     createdBy: {
