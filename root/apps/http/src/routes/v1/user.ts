@@ -1,4 +1,4 @@
-import { user } from "@repo/database";
+import { avatar, user } from "@repo/database";
 import { Router } from "express";
 import { updateMetadataSchema } from "../../types";
 
@@ -15,15 +15,20 @@ userRouter.post("/metadata", async (req, res) => {
     res.status(400).json({ error: "Missing fields" });
     return;
   }
-
-  const userFound = await user.findById(req.user._id);
-  if (!userFound) {
-    res.status(403).json({ error: "User not found" });
-    return;
-  }
-
   try {
-    userFound.avatarId = avatarId;
+    const avatarFound = await avatar.findById(avatarId);
+    if (!avatarFound) {
+      res.status(400).json({ error: "Avatar not found" });
+      return;
+    }
+
+    const userFound = await user.findById(req.user._id);
+    if (!userFound) {
+      res.status(403).json({ error: "User not found" });
+      return;
+    }
+
+    userFound.avatarId = avatarFound._id;
     await userFound.save();
     res.status(200).json({ message: "Metadata updated successfully" });
   } catch (err) {
@@ -36,7 +41,7 @@ userRouter.get("/metadata/bulk", async (req, res) => {
   // conver the ids to an array
   const userIdString = (req.query.ids as string) || "";
   const ids = userIdString.slice(1, userIdString.length - 1).split(",");
-  if (!ids.length) {
+  if (!ids.length || ids[0] === "") {
     res.status(400).json({ error: "No IDs provided" });
     return;
   }
@@ -46,7 +51,7 @@ userRouter.get("/metadata/bulk", async (req, res) => {
       userId: userFound._id,
       imageUrl: userFound.avatarId, // This assumes avatarId is a URL; modify if needed
     }));
-    res.status(200).json({ avatars: response });
+    res.status(200).json({ metadata: response });
   } catch (err) {
     res.status(500).json({ error: "Internal server error", message: err });
     return;

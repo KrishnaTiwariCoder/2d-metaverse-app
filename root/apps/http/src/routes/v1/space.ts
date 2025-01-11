@@ -11,7 +11,7 @@ spaceRouter.post("/", async (req, res) => {
     return;
   }
   const { name, dimensions, mapId } = parsedData.data;
-  if (!name || !dimensions || !mapId) {
+  if (!name || !dimensions) {
     res.status(400).json({ error: "Missing fields" });
     return;
   }
@@ -76,7 +76,11 @@ spaceRouter.delete("/delete/", async (req, res) => {
 
 spaceRouter.get("/all", async (req, res) => {
   try {
-    const spaces = await space.find({ createdBy: req.user._id });
+    // only get the username of the creator
+    const spaces = await space
+      .find({ createdBy: req.user._id })
+      .populate("createdBy", "username");
+    // const spaces = await space.find({ createdBy: req.user._id });
     const response = spaces.map((spaceE) => ({
       id: spaceE._id,
       name: spaceE.name,
@@ -84,6 +88,7 @@ spaceRouter.get("/all", async (req, res) => {
       thumbnail:
         spaceE.thumbnail ||
         "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcREO3tkIJnmJZcWmgLLR-z973QVHQ8zbwDGnw&s",
+      creator: spaceE.createdBy,
     }));
     res.status(200).json({ spaces: response });
   } catch (err) {
@@ -94,7 +99,9 @@ spaceRouter.get("/all", async (req, res) => {
 
 spaceRouter.get("/:spaceId", async (req, res) => {
   try {
-    const spaceFound = await space.findById(req.params.spaceId);
+    const spaceFound = await space
+      .findById(req.params.spaceId)
+      .populate("elements.id");
     if (!spaceFound) {
       res.status(400).json({ error: "Space not found" });
       return;
@@ -133,6 +140,10 @@ spaceRouter.post("/element", async (req, res) => {
       res.status(401).json({ error: "Unauthorized" });
       return;
     }
+    if (x > spaceFound.width || y > spaceFound.height) {
+      res.status(400).json({ error: "Invalid coordinates" });
+      return;
+    }
 
     spaceFound.elements.push({ id: elementId, x, y });
 
@@ -146,7 +157,7 @@ spaceRouter.post("/element", async (req, res) => {
 });
 
 spaceRouter.delete("/element", async (req, res) => {
-  const { elementId, spaceId } = req.body;
+  const { elementId, spaceId, x, y } = req.body;
   if (!elementId) {
     res.status(400).json({ error: "Missing required fields" });
     return;
@@ -161,6 +172,18 @@ spaceRouter.delete("/element", async (req, res) => {
       res.status(401).json({ error: "Unauthorized" });
       return;
     }
+
+    if (
+      !spaceFound.elements.find(
+        (element) =>
+          element.x === x &&
+          element.y === y &&
+          element.id.toString() == elementId.toString()
+      )
+    ) {
+      res.status(400).json({ error: "Element not found" });
+      return;
+    }
     // spaceFound.elements = spaceFound.elements.filter((element) => {
     //   if (element.id === elementId) return false;
     //   return true;
@@ -168,7 +191,10 @@ spaceRouter.delete("/element", async (req, res) => {
     spaceFound!.set(
       "elements",
       spaceFound.elements.filter(
-        (element) => element.id.toString() !== elementId.toString()
+        (element) =>
+          element.id.toString() !== elementId.toString() &&
+          element.x !== x &&
+          element.y !== y
       )
     );
 

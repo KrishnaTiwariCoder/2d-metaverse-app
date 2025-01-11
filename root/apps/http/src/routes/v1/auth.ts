@@ -37,7 +37,11 @@ authRouter.post("/signin", async (req, res) => {
 
     // Generate a JWT token
     const token = jwt.sign(
-      JSON.stringify(userFound),
+      {
+        _id: userFound._id,
+        username: userFound.username,
+        type: userFound.type,
+      },
       process.env.JWT_SECRET || JWT_SECRET
     );
     res.status(200).json({ token });

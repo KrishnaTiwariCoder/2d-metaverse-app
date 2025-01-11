@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
 import { JWT_SECRET } from "../contants";
 import { NextFunction, Request, Response } from "express";
+import { user } from "@repo/database";
 // Middleware for authentication
 export const authenticate = (
   req: Request,
@@ -43,4 +44,18 @@ export const isAdmin = (req: Request, res: Response, next: NextFunction) => {
     return;
   }
   res.status(401).json({ error: "You are not a valid admin" });
+};
+
+export const accountExists = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const userfound = await user.findOne({ _id: req.user._id });
+  if (!userfound) {
+    res.status(403).json({ error: "account does not exist now" });
+    res;
+    return;
+  }
+  next();
 };
