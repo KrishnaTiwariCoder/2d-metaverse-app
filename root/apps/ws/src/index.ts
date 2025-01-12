@@ -12,5 +12,6 @@ wss.on("connection", function connection(ws) {
   ws.on("error", console.error);
   ws.on("close", function close() {
     user.destroy();
+    console.log("user disconnected");
   });
 });

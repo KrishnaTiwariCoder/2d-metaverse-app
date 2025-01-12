@@ -101,7 +101,7 @@ spaceRouter.get("/:spaceId", async (req, res) => {
   try {
     const spaceFound = await space
       .findById(req.params.spaceId)
-      .populate("elements.id");
+      .populate("elements.id createdBy", "username");
     if (!spaceFound) {
       res.status(400).json({ error: "Space not found" });
       return;

@@ -39,3 +39,5 @@ yarn-error.log*
 config.ts
 config.js
 constants.ts
+messages.json
+messages.md
