@@ -116,7 +116,6 @@ adminRouter.post("/map/element", async (req, res) => {
     res.status(400).json({ error: "Missing required fields" });
     return;
   }
-  // console.log("yes", req.body);
   try {
     const elementFound = await element.findById(elementId);
     if (!elementFound) {
