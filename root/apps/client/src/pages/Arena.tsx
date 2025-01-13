@@ -1,4 +1,13 @@
 import { useEffect, useRef, useState } from "react";
+import VoiceSection from "../components/voiceSection";
+import ChatBox from "../components/chatBox";
+
+interface Message {
+  id: string;
+  text: string;
+  sender: string;
+  timestamp: Date;
+}
 
 const Arena = () => {
   const [token, setToken] = useState<string>("");
@@ -6,6 +15,8 @@ const Arena = () => {
 
   const canvasRef = useRef<any>(null);
   const wsRef = useRef<WebSocket | null>(null);
+
+  const [messages, setMessages] = useState<any[]>([]);
 
   const [players, setPlayers] = useState<Map<string, { x: number; y: number }>>(
     new Map()
@@ -142,6 +153,17 @@ const Arena = () => {
         });
         break;
       }
+      case "got-message": {
+        const { messageGot, sender } = message.payload;
+        const messageNew: Message = {
+          id: Date.now().toString(),
+          text: messageGot,
+          sender,
+          timestamp: new Date(),
+        };
+        setMessages((prev) => [...prev, messageNew]);
+        break;
+      }
     }
   };
 
@@ -220,6 +242,15 @@ const Arena = () => {
     }
   };
 
+  const sendMessage = (message: string) => {
+    wsRef.current?.send(
+      JSON.stringify({
+        type: "send-message",
+        payload: message,
+      })
+    );
+  };
+
   if (error) {
     return (
       <div className="p-4">
@@ -241,21 +272,39 @@ const Arena = () => {
   }
 
   return (
-    <div className="p-4">
-      <div className={`mb-2 ${getStatusColor()}`}>
-        Status: {connectionStatus}
+    <div className="flex flex-col w-full min-h-screen gap-4 p-4 bg-gray-900">
+      <VoiceSection />
+      <div className="bg-gray-800 rounded-lg border border-gray-700 p-4">
+        <div className={`mb-2 ${getStatusColor()}`}>
+          Status: {connectionStatus}
+        </div>
       </div>
-      <canvas
-        ref={canvasRef}
-        width={spaceDimensions.width}
-        height={spaceDimensions.height}
-        className="border border-gray-200 rounded-lg"
-      />
-      <div className="mt-4 text-sm text-gray-500">
-        Use arrow keys to move around
+      <div className="flex-1 bg-gray-800 rounded-lg border border-gray-700">
+        <div className="flex items-center justify-center w-full h-full min-h-[400px] p-4">
+          <canvas
+            ref={canvasRef}
+            width={spaceDimensions.width}
+            height={spaceDimensions.height}
+            className="border border-gray-200 rounded-lg"
+          />
+          <div>
+            <ChatBox
+              messages={messages}
+              setMessages={setMessages}
+              currentUser={myId}
+              sendMessage={sendMessage}
+              participants={players.size}
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-gray-800 rounded-lg border border-gray-700 p-4">
+        <span className="text-sm text-gray-400">
+          permissionAndCreatorInfoArea
+        </span>
       </div>
     </div>
   );
 };
-
 export default Arena;

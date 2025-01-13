@@ -88,8 +88,6 @@ export class User {
             const { x: MoveX, y: MoveY } = parsedData.payload;
             const xDisplacement = Math.abs(MoveX - this.x);
             const yDisplacement = Math.abs(MoveY - this.y);
-            console.log(MoveX, this.x, "x");
-            console.log(MoveY, this.y, "y");
             if (MoveX < 0 || MoveY < 0) {
               console.log("rejected cause of negative displacement");
               this.send({
@@ -160,6 +158,19 @@ export class User {
                 },
               });
             }
+          case "send-message":
+            const message = parsedData.payload;
+            RoomManager.getInstance().broadcast(
+              {
+                type: "got-message",
+                payload: {
+                  messageGot: message.text,
+                  sender: this.userId,
+                },
+              },
+              this,
+              this.spaceId!
+            );
         }
       });
     } catch (error) {
