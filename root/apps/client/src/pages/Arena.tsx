@@ -1,20 +1,33 @@
 import { useEffect, useRef, useState } from "react";
 
 const Arena = () => {
-  const params = new URLSearchParams(window.location.search);
-  const token = params.get("token");
-  const spaceId = params.get("spaceId");
+  const [token, setToken] = useState<string>("");
+  const [spaceId, setSpaceId] = useState<string>("");
 
   const canvasRef = useRef<any>(null);
-  const wsRef = useRef<any>(null);
-  const reconnectAttemptRef = useRef<number>(0);
-  const maxReconnectAttempts = 5;
+  const wsRef = useRef<WebSocket | null>(null);
 
-  const [players, setPlayers] = useState<Map<any, any>>(new Map());
-  const [currentPosition, setCurrentPosition] = useState<any>({ x: 0, y: 0 });
-  const [myId, setMyId] = useState<any>(null);
-  const [error, setError] = useState<any>(null);
-  const [connectionStatus, setConnectionStatus] = useState<any>("connecting");
+  const [players, setPlayers] = useState<Map<string, { x: number; y: number }>>(
+    new Map()
+  );
+  const [currentPosition, setCurrentPosition] = useState<{
+    x: number;
+    y: number;
+  }>({
+    x: 0,
+    y: 0,
+  });
+  const [myId, setMyId] = useState<string>("");
+  const [error, setError] = useState<string>("");
+  const [connectionStatus, setConnectionStatus] =
+    useState<string>("connecting");
+  const [spaceDimensions, setSpaceDimensions] = useState<{
+    width: number;
+    height: number;
+  }>({
+    width: 800,
+    height: 600,
+  });
 
   // Validate required parameters
   useEffect(() => {
@@ -32,9 +45,9 @@ const Arena = () => {
       wsRef.current.onopen = () => {
         console.log("WebSocket connected");
         setConnectionStatus("connected");
-        reconnectAttemptRef.current = 0;
+        setError("");
 
-        wsRef.current.send(
+        wsRef.current?.send(
           JSON.stringify({
             type: "join",
             payload: {
@@ -58,24 +71,6 @@ const Arena = () => {
       wsRef.current.onclose = () => {
         console.log("WebSocket closed");
         setConnectionStatus("disconnected");
-
-        if (reconnectAttemptRef.current < maxReconnectAttempts) {
-          reconnectAttemptRef.current += 1;
-          console.log(
-            `Reconnection attempt ${reconnectAttemptRef.current}/${maxReconnectAttempts}`
-          );
-          setConnectionStatus(
-            `reconnecting (${reconnectAttemptRef.current}/${maxReconnectAttempts})`
-          );
-
-          const timeout = Math.min(
-            1000 * Math.pow(2, reconnectAttemptRef.current - 1),
-            10000
-          );
-          setTimeout(setupWebSocket, timeout);
-        } else {
-          setError("Failed to connect to game server after multiple attempts");
-        }
       };
     } catch (err) {
       console.error("WebSocket setup error:", err);
@@ -97,10 +92,13 @@ const Arena = () => {
 
   const handleServerMessage = (message: any) => {
     switch (message.type) {
-      case "space-joined":
+      case "space-joined": {
         const { spawn, users } = message.payload;
         setCurrentPosition(spawn);
-
+        setSpaceDimensions({
+          width: message.payload.width,
+          height: message.payload.height,
+        });
         const newPlayers = new Map();
         users.forEach((user: any) => {
           newPlayers.set(user.id, user.spawn);
@@ -110,27 +108,40 @@ const Arena = () => {
         });
         setPlayers(newPlayers);
         break;
+      }
 
-      case "movement":
+      case "movement": {
         const { userId, x, y } = message.payload;
-        setPlayers((prev: any) => {
+        setPlayers((prev) => {
           const updated = new Map(prev);
           updated.set(userId, { x, y });
           return updated;
         });
         break;
-
+      }
       case "movement-rejected":
         setCurrentPosition(message.payload);
         break;
 
-      case "user-left":
-        setPlayers((prev: any) => {
+      case "user-joined":
+        setPlayers((prev) => {
+          const updated = new Map(prev);
+          updated.set(message.payload.userId, {
+            x: message.payload.x,
+            y: message.payload.y,
+          });
+          return updated;
+        });
+        break;
+
+      case "user-left": {
+        setPlayers((prev) => {
           const updated = new Map(prev);
           updated.delete(message.payload.userId);
           return updated;
         });
         break;
+      }
     }
   };
 
@@ -158,7 +169,6 @@ const Arena = () => {
         default:
           return;
       }
-
       wsRef.current?.send(
         JSON.stringify({
           type: "move",
@@ -167,6 +177,11 @@ const Arena = () => {
       );
 
       setCurrentPosition({ x: newX, y: newY });
+      setPlayers((prev) => {
+        const updated = new Map(prev);
+        updated.set(myId, { x: newX, y: newY });
+        return updated;
+      });
     };
 
     window.addEventListener("keydown", handleKeyDown);
@@ -209,6 +224,18 @@ const Arena = () => {
     return (
       <div className="p-4">
         <div className="text-red-500">{error}</div>
+        <div className="grid grid-cols-2 gap-2 mt-4">
+          <input
+            type="text"
+            value={token}
+            onChange={(e) => setToken(e.target.value)}
+          />
+          <input
+            type="text"
+            value={spaceId}
+            onChange={(e) => setSpaceId(e.target.value)}
+          />
+        </div>
       </div>
     );
   }
@@ -220,8 +247,8 @@ const Arena = () => {
       </div>
       <canvas
         ref={canvasRef}
-        width={800}
-        height={600}
+        width={spaceDimensions.width}
+        height={spaceDimensions.height}
         className="border border-gray-200 rounded-lg"
       />
       <div className="mt-4 text-sm text-gray-500">

@@ -15,6 +15,8 @@ export class User {
   private x: number;
   private y: number;
   private ws: WebSocket;
+  private spaceWidth?: number;
+  private spaceHeight?: number;
 
   constructor(ws: WebSocket) {
     this.id = getRandomId();
@@ -43,6 +45,8 @@ export class User {
               return;
             }
             this.spaceId = spaceId;
+            this.spaceWidth = spaceFound.width;
+            this.spaceHeight = spaceFound.height;
             this.x = Math.floor(Math.random() * spaceFound.width);
             this.y = Math.floor(Math.random() * spaceFound.height);
 
@@ -62,6 +66,8 @@ export class User {
                       id: u.userId,
                       spawn: { x: u.x, y: u.y },
                     })) ?? [],
+                width: this.spaceWidth,
+                height: this.spaceHeight,
               },
             });
 
@@ -82,20 +88,26 @@ export class User {
             const { x: MoveX, y: MoveY } = parsedData.payload;
             const xDisplacement = Math.abs(MoveX - this.x);
             const yDisplacement = Math.abs(MoveY - this.y);
+            console.log(MoveX, this.x, "x");
+            console.log(MoveY, this.y, "y");
+            if (MoveX < 0 || MoveY < 0) {
+              console.log("rejected cause of negative displacement");
+              this.send({
+                type: "movement-rejected",
+                payload: {
+                  x: this.x,
+                  y: this.y,
+                },
+              });
+              return;
+            }
             if (
               (xDisplacement === 10 && yDisplacement === 0) ||
               (xDisplacement === 0 && yDisplacement === 10)
             ) {
-              this.x = MoveX;
-              this.y = MoveY;
-              // reject movement if some other user is already there at the x and y
-              const otherUser = RoomManager.getInstance()
-                .rooms.get(this.spaceId!)
-                ?.find(
-                  (u) =>
-                    u.x === this.x && u.y === this.y && u.userId !== this.userId
-                );
-              if (otherUser) {
+              //reject movement if the x and y are more than the width and height of the space
+              if (MoveX > this.spaceWidth! || MoveY > this.spaceHeight!) {
+                console.log("rejected cause of space width and height");
                 this.send({
                   type: "movement-rejected",
                   payload: {
@@ -105,6 +117,26 @@ export class User {
                 });
                 return;
               }
+              // reject movement if some other user is already there at the x and y
+              const otherUser = RoomManager.getInstance()
+                .rooms.get(this.spaceId!)
+                ?.find(
+                  (u) =>
+                    u.x === this.x && u.y === this.y && u.userId !== this.userId
+                );
+              if (otherUser) {
+                console.log("rejected cause of other user");
+                this.send({
+                  type: "movement-rejected",
+                  payload: {
+                    x: this.x,
+                    y: this.y,
+                  },
+                });
+                return;
+              }
+              this.x = MoveX;
+              this.y = MoveY;
               RoomManager.getInstance().broadcast(
                 {
                   type: "movement",
@@ -118,15 +150,16 @@ export class User {
                 this.spaceId!
               );
               return;
+            } else {
+              console.log("rejected cause of displacement");
+              this.send({
+                type: "movement-rejected",
+                payload: {
+                  x: this.x,
+                  y: this.y,
+                },
+              });
             }
-
-            this.send({
-              type: "movement-rejected",
-              payload: {
-                x: this.x,
-                y: this.y,
-              },
-            });
         }
       });
     } catch (error) {
