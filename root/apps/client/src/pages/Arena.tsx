@@ -120,7 +120,6 @@ const Arena = () => {
         setPlayers(newPlayers);
         break;
       }
-
       case "movement": {
         const { userId, x, y } = message.payload;
         setPlayers((prev) => {
