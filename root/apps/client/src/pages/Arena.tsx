@@ -15,7 +15,6 @@ const Arena = () => {
 
   const canvasRef = useRef<any>(null);
   const wsRef = useRef<WebSocket | null>(null);
-
   const [messages, setMessages] = useState<any[]>([]);
 
   const [players, setPlayers] = useState<Map<string, { x: number; y: number }>>(
@@ -53,7 +52,7 @@ const Arena = () => {
     try {
       wsRef.current = new WebSocket("ws://localhost:3001");
 
-      wsRef.current.onopen = () => {
+      wsRef.current.onopen = async () => {
         console.log("WebSocket connected");
         setConnectionStatus("connected");
         setError("");
@@ -272,7 +271,7 @@ const Arena = () => {
 
   return (
     <div className="flex flex-col w-full min-h-screen gap-4 p-4 bg-gray-900">
-      <VoiceSection />
+      <VoiceSection ws={wsRef} players={players} streams={[]} />
       <div className="bg-gray-800 rounded-lg border border-gray-700 p-4">
         <div className={`mb-2 ${getStatusColor()}`}>
           Status: {connectionStatus}
@@ -297,6 +296,8 @@ const Arena = () => {
           </div>
         </div>
       </div>
+
+      <div className="bg-gray-800 rounded-lg border border-gray-700 p-4 flex flex-col gap-2"></div>
 
       <div className="bg-gray-800 rounded-lg border border-gray-700 p-4">
         <span className="text-sm text-gray-400">

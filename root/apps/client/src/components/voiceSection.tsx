@@ -1,14 +1,28 @@
+import { useEffect } from "react";
 import VoiceBox from "./voiceBox";
+import { MutableRefObject } from "react";
 
-const voiceSection = () => {
+interface VoiceSectionProps {
+  ws: MutableRefObject<WebSocket | null>;
+  players: Map<string, any>;
+  streams: any[];
+}
+const VoiceSection = ({ ws, players }: VoiceSectionProps) => {
+  useEffect(() => {
+    console.log(ws);
+  }, []);
   return (
     <div className="grid grid-cols-4 gap-2">
       {/* First three identical voice boxes */}
-      {[1, 2, 3].map((box) => (
-        <VoiceBox key={box} />
-      ))}
+
+      {Array.from(players, ([name, value]) => ({ name, value })).map(
+        (player, index) => {
+          console.log(player, index);
+          return <VoiceBox participant={player} key={index} />;
+        }
+      )}
     </div>
   );
 };
 
-export default voiceSection;
+export default VoiceSection;

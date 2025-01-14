@@ -44,11 +44,41 @@ export class User {
               this.ws.close();
               return;
             }
+
             this.spaceId = spaceId;
+            const spaceMembers = RoomManager.getInstance().rooms.get(spaceId);
+            let spawnX: number = Math.floor(Math.random() * spaceFound.width),
+              spawnY: number = Math.floor(Math.random() * spaceFound.height);
+
+            // this code ensures that if the user already is in the space, they spawn at the position they were in
+            if (spaceMembers?.find((u) => u.userId === this.userId)) {
+              spawnX = this.x;
+              spawnY = this.y;
+            }
+
+            // this code ensures that the user doesn't spawn on top of another user
+            let userExistAtThatCoordinate = spaceMembers?.find(
+              (u) =>
+                Math.abs(u.x - spawnX) <= 50 &&
+                Math.abs(u.y - spawnY) <= 50 &&
+                u.userId !== this.userId
+            );
+
+            while (userExistAtThatCoordinate) {
+              spawnX = Math.floor(Math.random() * spaceFound.width);
+              spawnY = Math.floor(Math.random() * spaceFound.height);
+              userExistAtThatCoordinate = spaceMembers?.find(
+                (u) =>
+                  Math.abs(u.x - spawnX) <= 50 &&
+                  Math.abs(u.y - spawnY) <= 50 &&
+                  u.userId !== this.userId
+              );
+            }
+
             this.spaceWidth = spaceFound.width;
             this.spaceHeight = spaceFound.height;
-            this.x = Math.floor(Math.random() * spaceFound.width);
-            this.y = Math.floor(Math.random() * spaceFound.height);
+            this.x = spawnX;
+            this.y = spawnY;
 
             RoomManager.getInstance().addUser(spaceId, this);
             this.send({
@@ -120,7 +150,9 @@ export class User {
                 .rooms.get(this.spaceId!)
                 ?.find(
                   (u) =>
-                    u.x === this.x && u.y === this.y && u.userId !== this.userId
+                    Math.abs(u.x - MoveX) <= 50 &&
+                    Math.abs(u.y - MoveY) <= 50 &&
+                    u.userId !== this.userId
                 );
               if (otherUser) {
                 console.log("rejected cause of other user");
