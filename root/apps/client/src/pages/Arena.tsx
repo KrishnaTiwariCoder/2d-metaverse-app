@@ -1,13 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import VoiceSection from "../components/voiceSection";
 import ChatBox from "../components/chatBox";
-
-interface Message {
-  id: string;
-  text: string;
-  sender: string;
-  timestamp: Date;
-}
+import {
+  getStatusColor,
+  handleServerMessage,
+  sendMessage,
+} from "../utils/arena";
+import Canvas from "../components/canvas";
 
 const Arena = () => {
   const [token, setToken] = useState<string>("");
@@ -15,11 +14,13 @@ const Arena = () => {
 
   const canvasRef = useRef<any>(null);
   const wsRef = useRef<WebSocket | null>(null);
+
   const [messages, setMessages] = useState<any[]>([]);
 
   const [players, setPlayers] = useState<Map<string, { x: number; y: number }>>(
     new Map()
   );
+
   const [currentPosition, setCurrentPosition] = useState<{
     x: number;
     y: number;
@@ -27,6 +28,7 @@ const Arena = () => {
     x: 0,
     y: 0,
   });
+
   const [myId, setMyId] = useState<string>("");
   const [error, setError] = useState<string>("");
   const [connectionStatus, setConnectionStatus] =
@@ -46,12 +48,10 @@ const Arena = () => {
       return;
     }
   }, [token, spaceId]);
-
-  // WebSocket connection setup with retry mechanism
+  // Setup WebSocket connection
   const setupWebSocket = () => {
     try {
-      wsRef.current = new WebSocket("ws://localhost:3001");
-
+      wsRef.current = new WebSocket("ws://192.168.0.108:3001");
       wsRef.current.onopen = async () => {
         console.log("WebSocket connected");
         setConnectionStatus("connected");
@@ -70,7 +70,14 @@ const Arena = () => {
 
       wsRef.current.onmessage = (event: any) => {
         const message = JSON.parse(event.data);
-        handleServerMessage(message);
+        handleServerMessage(
+          message,
+          setCurrentPosition,
+          setSpaceDimensions,
+          setPlayers,
+          setMyId,
+          setMessages
+        );
       };
 
       wsRef.current.onerror = (error: any) => {
@@ -85,6 +92,7 @@ const Arena = () => {
     } catch (err) {
       console.error("WebSocket setup error:", err);
       setError("Failed to initialize game connection");
+      alert("error: " + err);
     }
   };
 
@@ -99,115 +107,14 @@ const Arena = () => {
       }
     };
   }, [token, spaceId]);
-
-  const handleServerMessage = (message: any) => {
-    switch (message.type) {
-      case "space-joined": {
-        const { spawn, users } = message.payload;
-        setCurrentPosition(spawn);
-        setSpaceDimensions({
-          width: message.payload.width,
-          height: message.payload.height,
-        });
-        const newPlayers = new Map();
-        users.forEach((user: any) => {
-          newPlayers.set(user.id, user.spawn);
-          if (user.spawn.x === spawn.x && user.spawn.y === spawn.y) {
-            setMyId(user.id);
-          }
-        });
-        setPlayers(newPlayers);
-        break;
-      }
-      case "movement": {
-        const { userId, x, y } = message.payload;
-        setPlayers((prev) => {
-          const updated = new Map(prev);
-          updated.set(userId, { x, y });
-          return updated;
-        });
-        break;
-      }
-      case "movement-rejected":
-        setCurrentPosition(message.payload);
-        break;
-
-      case "user-joined":
-        setPlayers((prev) => {
-          const updated = new Map(prev);
-          updated.set(message.payload.userId, {
-            x: message.payload.x,
-            y: message.payload.y,
-          });
-          return updated;
-        });
-        break;
-
-      case "user-left": {
-        setPlayers((prev) => {
-          const updated = new Map(prev);
-          updated.delete(message.payload.userId);
-          return updated;
-        });
-        break;
-      }
-      case "got-message": {
-        const { messageGot, sender } = message.payload;
-        const messageNew: Message = {
-          id: Date.now().toString(),
-          text: messageGot,
-          sender,
-          timestamp: new Date(),
-        };
-        setMessages((prev) => [...prev, messageNew]);
-        break;
-      }
-    }
+  // Dummy data for testing
+  const handleDummyData = () => {
+    console.log("clicked");
+    setToken(
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NzgyNjZmZTlhMzUyMTMyMWQ0ZDE1OTEiLCJ1c2VybmFtZSI6ImtyaXNobmF1c2VyMiIsInR5cGUiOiJ1c2VyIiwiaWF0IjoxNzM2OTQ0ODk3fQ.MCaMOrCl9TwzsdMVXcVhqN-hAxtIQAzEpephvUQWHO4"
+    );
+    setSpaceId("6787acdaa29ceb6ed47a6f4a");
   };
-
-  useEffect(() => {
-    const handleKeyDown = (e: any) => {
-      if (connectionStatus !== "connected") return;
-
-      let newX = currentPosition.x;
-      let newY = currentPosition.y;
-      const step = 10;
-
-      switch (e.key) {
-        case "ArrowUp":
-          newY -= step;
-          break;
-        case "ArrowDown":
-          newY += step;
-          break;
-        case "ArrowLeft":
-          newX -= step;
-          break;
-        case "ArrowRight":
-          newX += step;
-          break;
-        default:
-          return;
-      }
-      wsRef.current?.send(
-        JSON.stringify({
-          type: "move",
-          payload: { x: newX, y: newY },
-        })
-      );
-
-      setCurrentPosition({ x: newX, y: newY });
-      setPlayers((prev) => {
-        const updated = new Map(prev);
-        updated.set(myId, { x: newX, y: newY });
-        return updated;
-      });
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [currentPosition, connectionStatus]);
-
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -225,30 +132,6 @@ const Arena = () => {
     });
   }, [players, myId]);
 
-  const getStatusColor = () => {
-    switch (connectionStatus) {
-      case "connected":
-        return "text-green-500";
-      case "connecting":
-        return "text-yellow-500";
-      case "disconnected":
-        return "text-red-500";
-      case "error":
-        return "text-red-500";
-      default:
-        return "text-yellow-500";
-    }
-  };
-
-  const sendMessage = (message: string) => {
-    wsRef.current?.send(
-      JSON.stringify({
-        type: "send-message",
-        payload: message,
-      })
-    );
-  };
-
   if (error) {
     return (
       <div className="p-4">
@@ -264,6 +147,12 @@ const Arena = () => {
             value={spaceId}
             onChange={(e) => setSpaceId(e.target.value)}
           />
+          <button
+            className="bg-blue-500 text-white p-3 rounded-lg"
+            onClick={handleDummyData}
+          >
+            Send dummy data
+          </button>
         </div>
       </div>
     );
@@ -273,17 +162,21 @@ const Arena = () => {
     <div className="flex flex-col w-full min-h-screen gap-4 p-4 bg-gray-900">
       <VoiceSection ws={wsRef} players={players} streams={[]} />
       <div className="bg-gray-800 rounded-lg border border-gray-700 p-4">
-        <div className={`mb-2 ${getStatusColor()}`}>
+        <div className={`mb-2 ${getStatusColor(connectionStatus)}`}>
           Status: {connectionStatus}
         </div>
       </div>
       <div className="flex-1 bg-gray-800 rounded-lg border border-gray-700">
         <div className="flex items-center justify-center w-full h-full min-h-[400px] p-4">
-          <canvas
-            ref={canvasRef}
-            width={spaceDimensions.width}
-            height={spaceDimensions.height}
-            className="border border-gray-200 rounded-lg"
+          <Canvas
+            canvasRef={canvasRef}
+            spaceDimensions={spaceDimensions}
+            connectionStatus={connectionStatus}
+            currentPosition={currentPosition}
+            wsRef={wsRef}
+            setCurrentPosition={setCurrentPosition}
+            setPlayers={setPlayers}
+            myId={myId}
           />
           <div>
             <ChatBox
@@ -292,13 +185,13 @@ const Arena = () => {
               currentUser={myId}
               sendMessage={sendMessage}
               participants={players.size}
+              wsRef={wsRef}
             />
           </div>
         </div>
       </div>
 
       <div className="bg-gray-800 rounded-lg border border-gray-700 p-4 flex flex-col gap-2"></div>
-
       <div className="bg-gray-800 rounded-lg border border-gray-700 p-4">
         <span className="text-sm text-gray-400">
           permissionAndCreatorInfoArea

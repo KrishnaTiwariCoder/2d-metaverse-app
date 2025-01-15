@@ -14,6 +14,7 @@ const ChatRoom = ({
   messages,
   setMessages,
   participants,
+  wsRef,
 }: any) => {
   const [newMessage, setNewMessage] = useState("");
 
@@ -26,7 +27,7 @@ const ChatRoom = ({
         timestamp: new Date(),
       };
       setMessages([...messages, message]);
-      sendMessage(message);
+      sendMessage(message, wsRef);
       setNewMessage("");
     }
   };
