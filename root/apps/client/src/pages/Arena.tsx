@@ -1,12 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import VoiceSection from "../components/voiceSection";
-import ChatBox from "../components/chatBox";
-import {
-  getStatusColor,
-  handleServerMessage,
-  sendMessage,
-} from "../utils/arena";
-import Canvas from "../components/canvas";
+import { getStatusColor, handleServerMessage, Player } from "../utils/arena";
+import VoiceSection from "../components/VoiceSection";
+import Canvas from "../components/Canvas";
+import ChatRoom from "../components/ChatBox";
 
 const Arena = () => {
   const [token, setToken] = useState<string>("");
@@ -17,9 +13,7 @@ const Arena = () => {
 
   const [messages, setMessages] = useState<any[]>([]);
 
-  const [players, setPlayers] = useState<Map<string, { x: number; y: number }>>(
-    new Map()
-  );
+  const [players, setPlayers] = useState<any>([]);
 
   const [currentPosition, setCurrentPosition] = useState<{
     x: number;
@@ -76,7 +70,8 @@ const Arena = () => {
           setSpaceDimensions,
           setPlayers,
           setMyId,
-          setMessages
+          setMessages,
+          setError
         );
       };
 
@@ -103,13 +98,13 @@ const Arena = () => {
 
     return () => {
       if (wsRef.current) {
+        console.log("yes ws closed");
         wsRef.current.close();
       }
     };
   }, [token, spaceId]);
   // Dummy data for testing
   const handleDummyData = () => {
-    console.log("clicked");
     setToken(
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NzgyNjZmZTlhMzUyMTMyMWQ0ZDE1OTEiLCJ1c2VybmFtZSI6ImtyaXNobmF1c2VyMiIsInR5cGUiOiJ1c2VyIiwiaWF0IjoxNzM2OTQ0ODk3fQ.MCaMOrCl9TwzsdMVXcVhqN-hAxtIQAzEpephvUQWHO4"
     );
@@ -123,9 +118,11 @@ const Arena = () => {
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    players.forEach((pos: any, id: any) => {
+    players.forEach((player: any) => {
+      const { x, y, id } = player;
+
       ctx.beginPath();
-      ctx.arc(pos.x, pos.y, 20, 0, Math.PI * 2);
+      ctx.arc(x, y, 20, 0, Math.PI * 2);
       ctx.fillStyle = id === myId ? "#4f46e5" : "#64748b";
       ctx.fill();
       ctx.closePath();
@@ -160,7 +157,13 @@ const Arena = () => {
 
   return (
     <div className="flex flex-col w-full min-h-screen gap-4 p-4 bg-gray-900">
-      <VoiceSection ws={wsRef} players={players} streams={[]} />
+      <VoiceSection
+        ws={wsRef}
+        players={players}
+        streams={[]}
+        myId={myId}
+        setPlayers={setPlayers}
+      />
       <div className="bg-gray-800 rounded-lg border border-gray-700 p-4">
         <div className={`mb-2 ${getStatusColor(connectionStatus)}`}>
           Status: {connectionStatus}
@@ -179,12 +182,11 @@ const Arena = () => {
             myId={myId}
           />
           <div>
-            <ChatBox
+            <ChatRoom
               messages={messages}
               setMessages={setMessages}
-              currentUser={myId}
-              sendMessage={sendMessage}
-              participants={players.size}
+              currentUser={players.find((p: Player) => p.id === myId)}
+              participants={players.length}
               wsRef={wsRef}
             />
           </div>

@@ -1,7 +1,6 @@
-import jwt from "jsonwebtoken";
-import { JWT_SECRET } from "../contants";
 import { NextFunction, Request, Response } from "express";
 import { user } from "@repo/database";
+import { verifyToken } from "../services";
 // Middleware for authentication
 export const authenticate = (
   req: Request,
@@ -25,16 +24,15 @@ export const authenticate = (
   }
 
   // Verify the token
-  jwt.verify(token, process.env.JWT_SECRET_KEY || JWT_SECRET, (err, user) => {
-    if (err || !user) {
-      res.status(403).json({ error: "Token is invalid or expired" });
-      return;
-    }
+  const decoded = verifyToken(token);
+  if (!decoded) {
+    res.status(403).json({ error: "Token is invalid or expired" });
+    return;
+  }
 
-    // Attach user info to the request object for further use
-    req.user = JSON.parse(JSON.stringify(user));
-    next(); // Proceed to the next middleware or route handler
-  });
+  // Attach user info to the request object for further use
+  req.user = JSON.parse(JSON.stringify(decoded));
+  next(); // Proceed to the next middleware or route handler
 };
 
 export const isAdmin = (req: Request, res: Response, next: NextFunction) => {

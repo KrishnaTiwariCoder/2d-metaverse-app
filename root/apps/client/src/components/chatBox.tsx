@@ -1,16 +1,17 @@
 import { useState } from "react";
 import { Send } from "lucide-react";
+import { sendMessage } from "../utils/arena";
 
-interface Message {
+export interface Message {
   id: string;
   text: string;
   sender: string;
   timestamp: Date;
+  senderName: string;
 }
 
-const ChatRoom = ({
+const ChatBox = ({
   currentUser,
-  sendMessage,
   messages,
   setMessages,
   participants,
@@ -23,8 +24,9 @@ const ChatRoom = ({
       const message: Message = {
         id: Date.now().toString(),
         text: newMessage,
-        sender: currentUser,
+        sender: currentUser.id,
         timestamp: new Date(),
+        senderName: currentUser.name,
       };
       setMessages([...messages, message]);
       sendMessage(message, wsRef);
@@ -45,16 +47,20 @@ const ChatRoom = ({
           <div
             key={message.id}
             className={`flex ${
-              message.sender === currentUser ? "justify-end" : "justify-start"
+              message.sender === currentUser.id
+                ? "justify-end"
+                : "justify-start"
             }`}
           >
             <div
               className={`max-w-[70%] rounded-lg p-2 ${
-                message.sender === currentUser ? "bg-blue-600" : "bg-slate-800"
+                message.sender === currentUser.id
+                  ? "bg-blue-600"
+                  : "bg-slate-800"
               }`}
             >
               <div className="flex items-baseline space-x-2 mb-1">
-                <span className="text-sm">{message.sender}</span>
+                <span className="text-sm">{message.senderName}</span>
                 <span className="text-xs text-slate-400">
                   {message.timestamp.toLocaleTimeString([], {
                     hour: "2-digit",
@@ -90,4 +96,4 @@ const ChatRoom = ({
   );
 };
 
-export default ChatRoom;
+export default ChatBox;

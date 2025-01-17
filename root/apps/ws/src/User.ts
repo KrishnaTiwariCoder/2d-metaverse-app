@@ -11,12 +11,16 @@ function getRandomId() {
 export class User {
   public id: string;
   public userId?: string;
+  public name?: string;
   private spaceId?: string;
   private x: number;
   private y: number;
   private ws: WebSocket;
   private spaceWidth?: number;
   private spaceHeight?: number;
+  private isSpeaking?: boolean;
+  private isMuted?: boolean;
+  private isDeafened?: boolean;
 
   constructor(ws: WebSocket) {
     this.id = getRandomId();
@@ -32,12 +36,16 @@ export class User {
         switch (parsedData.type) {
           case "join":
             const { spaceId, token } = parsedData.payload;
-            const userId = (jwt.verify(token, JWT_SECRET) as JwtPayload)._id;
+            const { _id: userId, username: name } = jwt.verify(
+              token,
+              JWT_SECRET
+            ) as JwtPayload;
             if (!userId) {
               this.ws.close();
               return;
             }
             this.userId = userId;
+            this.name = name;
 
             const spaceFound = await space.findById(spaceId);
             if (!spaceFound) {
@@ -51,10 +59,16 @@ export class User {
               spawnY: number = Math.floor(Math.random() * spaceFound.height);
 
             // this code ensures that if the user already is in the space, they spawn at the position they were in
-            if (spaceMembers?.find((u) => u.userId === this.userId)) {
-              spawnX = this.x;
-              spawnY = this.y;
-            }
+            // if (spaceMembers?.find((u) => u.userId === this.userId)) {
+            //   this.send({
+            //     type: "already-in-space",
+            //     payload: {
+            //       x: this.x,
+            //       y: this.y,
+            //     },
+            //   });
+            //   return;
+            // }
 
             // this code ensures that the user doesn't spawn on top of another user
             let userExistAtThatCoordinate = spaceMembers?.find(
@@ -79,6 +93,9 @@ export class User {
             this.spaceHeight = spaceFound.height;
             this.x = spawnX;
             this.y = spawnY;
+            this.isSpeaking = false;
+            this.isMuted = false;
+            this.isDeafened = false;
 
             RoomManager.getInstance().addUser(spaceId, this);
             this.send({
@@ -88,13 +105,18 @@ export class User {
                   x: this.x,
                   y: this.y,
                 },
+                myId: this.userId,
                 users:
                   RoomManager.getInstance()
                     .rooms.get(spaceId)
-                    ?.filter((u) => u.id !== this.userId)
                     ?.map((u) => ({
                       id: u.userId,
-                      spawn: { x: u.x, y: u.y },
+                      x: u.x,
+                      y: u.y,
+                      name: u.name,
+                      isSpeaking: u.isSpeaking,
+                      isMuted: u.isMuted,
+                      isDeafened: u.isDeafened,
                     })) ?? [],
                 width: this.spaceWidth,
                 height: this.spaceHeight,
@@ -108,6 +130,7 @@ export class User {
                   userId: this.userId,
                   x: this.x,
                   y: this.y,
+                  name: this.name,
                 },
               },
               this,
@@ -197,12 +220,75 @@ export class User {
                 type: "got-message",
                 payload: {
                   messageGot: message.text,
-                  sender: this.userId,
+                  sender: message.sender,
+                  senderName: message.senderName,
                 },
               },
               this,
               this.spaceId!
             );
+          case "mute": {
+            if (this.userId !== parsedData.payload.userId) return;
+            this.isMuted = true;
+
+            RoomManager.getInstance().broadcast(
+              {
+                type: "mute",
+                payload: {
+                  userId: this.userId,
+                  isMuted: this.isMuted,
+                },
+              },
+              this,
+              this.spaceId!
+            );
+            break;
+          }
+          case "unmute": {
+            this.isMuted = false;
+            RoomManager.getInstance().broadcast(
+              {
+                type: "unmute",
+                payload: {
+                  userId: this.userId,
+                  isMuted: this.isMuted,
+                },
+              },
+              this,
+              this.spaceId!
+            );
+            break;
+          }
+          case "deafen": {
+            this.isDeafened = true;
+            RoomManager.getInstance().broadcast(
+              {
+                type: "deafen",
+                payload: {
+                  userId: this.userId!,
+                  isDeafened: this.isDeafened!,
+                },
+              },
+              this,
+              this.spaceId!
+            );
+            break;
+          }
+          case "undeafen": {
+            this.isDeafened = false;
+            RoomManager.getInstance().broadcast(
+              {
+                type: "undeafen",
+                payload: {
+                  userId: this.userId,
+                  isDeafened: this.isDeafened,
+                },
+              },
+              this,
+              this.spaceId!
+            );
+            break;
+          }
         }
       });
     } catch (error) {

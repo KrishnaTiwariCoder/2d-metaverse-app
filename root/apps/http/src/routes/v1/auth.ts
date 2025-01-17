@@ -2,8 +2,7 @@ import { user } from "@repo/database";
 import { Router } from "express";
 import bcrypt from "bcrypt";
 import { loginSchema, signupSchema } from "../../types";
-import jwt from "jsonwebtoken";
-import { JWT_SECRET } from "../../contants";
+import { generateLoginToken } from "../../services";
 
 export const authRouter = Router();
 
@@ -36,14 +35,7 @@ authRouter.post("/signin", async (req, res) => {
     }
 
     // Generate a JWT token
-    const token = jwt.sign(
-      {
-        _id: userFound._id,
-        username: userFound.username,
-        type: userFound.type,
-      },
-      process.env.JWT_SECRET || JWT_SECRET
-    );
+    const token = generateLoginToken(userFound);
     res.status(200).json({ token });
     return;
   } catch (err) {

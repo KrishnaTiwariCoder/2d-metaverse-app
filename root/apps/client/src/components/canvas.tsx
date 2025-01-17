@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { Player } from "../utils/arena";
 
 const Canvas = ({
   canvasRef,
@@ -43,9 +44,14 @@ const Canvas = ({
 
       setCurrentPosition({ x: newX, y: newY });
       setPlayers((prev: any) => {
-        const updated = new Map(prev);
-        updated.set(myId, { x: newX, y: newY });
-        return updated;
+        const updated = prev.map((p: Player) => {
+          if (p.id === myId) {
+            return { ...p, x: newX, y: newY };
+          }
+          return p;
+        });
+
+        return [...updated];
       });
     };
 
