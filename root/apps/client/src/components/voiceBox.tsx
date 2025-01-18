@@ -6,17 +6,26 @@ const VoiceBox = ({
   onMuteToggle,
   onDeafenToggle,
   myId,
+  provideRef,
 }: any) => {
   return (
     <div
       key={index}
       className={`
-                aspect-square bg-gray-800 rounded-lg border 
-                ${player.isSpeaking ? "border-green-500" : "border-gray-700"}
-                p-3 flex flex-col items-center justify-between
-                w-32 h-32
-                `}
+        aspect-square bg-gray-800 rounded-lg border 
+        ${player.isSpeaking ? "border-green-500" : "border-gray-700"}
+        p-3 flex flex-col items-center justify-between
+        w-40 h-40
+      `}
     >
+      <audio
+        autoPlay
+        ref={(instance) => provideRef(instance, player.id)}
+      ></audio>
+      <video
+        autoPlay
+        ref={(instance) => provideRef(instance, player.id)}
+      ></video>
       {/* User Avatar/Identifier */}
       <div className="w-12 h-12 rounded-full bg-gray-700 flex items-center justify-center">
         <span className="text-gray-300 text-sm font-medium">

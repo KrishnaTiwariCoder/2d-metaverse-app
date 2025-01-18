@@ -8,6 +8,7 @@ export interface Player {
   isDeafened: boolean;
   isSpeaking: boolean;
   name: string;
+  stream: any;
 }
 
 export const getStatusColor = (connectionStatus: any) => {
@@ -175,3 +176,8 @@ export const handleServerMessage = (
     }
   }
 };
+
+export const tokens = [
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NzgyNTExYWIxODg2MTUzMTA3ZDM1MzQiLCJ1c2VybmFtZSI6ImtyaXNobmEiLCJ0eXBlIjoiYWRtaW4iLCJpYXQiOjE3MzcxMTQ0OTl9.kRfGkEe-ZwF06LSwgO85nCJX7JgPW_Ge9BXYSD-pLhY",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NzgyNDkyNTNiN2E3ZjE2ZTBhODFhMjEiLCJ1c2VybmFtZSI6ImtyaXNobmEyIiwidHlwZSI6ImFkbWluIiwiaWF0IjoxNzM3MTI0MjYzfQ.ClMqobwuhW7fVSZAcxIdlLeEshhGF0HD537l1nFYFhs",
+];

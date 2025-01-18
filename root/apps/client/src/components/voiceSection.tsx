@@ -1,23 +1,28 @@
+import { useRef } from "react";
 import { Player } from "../utils/arena";
 import VoiceBox from "./VoiceBox";
+import { useWebRTC } from "../utils/voice";
 
 interface VoiceSectionProps {
   ws: any;
   players: any;
-  streams: any;
   myId: string;
   setPlayers: any;
 }
 
 const VoiceSection = ({ ws, players, setPlayers, myId }: VoiceSectionProps) => {
-  // const localStream = useRef<any>(null);
-  // const connections = useRef<any>({});
-  // const audioRefs = useRef<any>({});
+  const audioRefs = useRef<any>({});
+  const localStream = useRef<any>(null);
+
+  const provideRef = (instance: any, userId: string) => {
+    audioRefs.current[userId] = instance;
+  };
+
+  useWebRTC({ players, myId, audioRefs, localStream, setPlayers });
 
   const me = players.find((p: Player) => p.id === myId);
 
   const onMuteToggle = () => {
-    // websocket logic to send mute message
     ws.current?.send(
       JSON.stringify({
         type: me.isMuted ? "unmute" : "mute",
@@ -27,8 +32,6 @@ const VoiceSection = ({ ws, players, setPlayers, myId }: VoiceSectionProps) => {
         },
       })
     );
-    console.log(me.isMuted ? "unmuted" : "muted");
-    // logic to update the state of the player
     setPlayers((prev: any) => {
       const updated = prev.map((p: Player) => {
         if (p.id === myId) {
@@ -50,7 +53,6 @@ const VoiceSection = ({ ws, players, setPlayers, myId }: VoiceSectionProps) => {
         },
       })
     );
-    console.log(me.isDeafened ? "undeafened" : "deafened");
     // logic to update the state of the player
     setPlayers((prev: any) => {
       const updated = prev.map((p: Player) => {
@@ -73,6 +75,7 @@ const VoiceSection = ({ ws, players, setPlayers, myId }: VoiceSectionProps) => {
           onMuteToggle={onMuteToggle}
           onDeafenToggle={onDeafenToggle}
           myId={myId}
+          provideRef={provideRef}
         />
       )}
       {players
@@ -86,6 +89,7 @@ const VoiceSection = ({ ws, players, setPlayers, myId }: VoiceSectionProps) => {
               onDeafenToggle={onDeafenToggle}
               myId={myId}
               key={index}
+              provideRef={provideRef}
             />
           );
         })}

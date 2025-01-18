@@ -1,5 +1,10 @@
 import { useEffect, useRef, useState } from "react";
-import { getStatusColor, handleServerMessage, Player } from "../utils/arena";
+import {
+  getStatusColor,
+  handleServerMessage,
+  Player,
+  tokens,
+} from "../utils/arena";
 import VoiceSection from "../components/VoiceSection";
 import Canvas from "../components/Canvas";
 import ChatRoom from "../components/ChatBox";
@@ -37,6 +42,16 @@ const Arena = () => {
 
   // Validate required parameters
   useEffect(() => {
+    const localToken = localStorage.getItem("token");
+    const localSpaceId = localStorage.getItem("spaceId");
+    if (!localToken || !localSpaceId) {
+      setError("Missing required parameters: token and spaceId");
+      return;
+    } else {
+      setToken(localToken);
+      setSpaceId(localSpaceId);
+    }
+
     if (!token || !spaceId) {
       setError("Missing required parameters: token and spaceId");
       return;
@@ -105,10 +120,11 @@ const Arena = () => {
   }, [token, spaceId]);
   // Dummy data for testing
   const handleDummyData = () => {
-    setToken(
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NzgyNjZmZTlhMzUyMTMyMWQ0ZDE1OTEiLCJ1c2VybmFtZSI6ImtyaXNobmF1c2VyMiIsInR5cGUiOiJ1c2VyIiwiaWF0IjoxNzM2OTQ0ODk3fQ.MCaMOrCl9TwzsdMVXcVhqN-hAxtIQAzEpephvUQWHO4"
-    );
+    const used = Math.floor(Math.random() * tokens.length);
+    setToken(tokens[used]);
     setSpaceId("6787acdaa29ceb6ed47a6f4a");
+    localStorage.setItem("token", tokens[used]);
+    localStorage.setItem("spaceId", "6787acdaa29ceb6ed47a6f4a");
   };
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -160,7 +176,6 @@ const Arena = () => {
       <VoiceSection
         ws={wsRef}
         players={players}
-        streams={[]}
         myId={myId}
         setPlayers={setPlayers}
       />
