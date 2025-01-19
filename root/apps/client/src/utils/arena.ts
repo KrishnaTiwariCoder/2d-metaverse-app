@@ -8,7 +8,7 @@ export interface Player {
   isDeafened: boolean;
   isSpeaking: boolean;
   name: string;
-  stream: any;
+  connection?: RTCPeerConnection;
 }
 
 export const getStatusColor = (connectionStatus: any) => {
@@ -180,4 +180,6 @@ export const handleServerMessage = (
 export const tokens = [
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NzgyNTExYWIxODg2MTUzMTA3ZDM1MzQiLCJ1c2VybmFtZSI6ImtyaXNobmEiLCJ0eXBlIjoiYWRtaW4iLCJpYXQiOjE3MzcxMTQ0OTl9.kRfGkEe-ZwF06LSwgO85nCJX7JgPW_Ge9BXYSD-pLhY",
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NzgyNDkyNTNiN2E3ZjE2ZTBhODFhMjEiLCJ1c2VybmFtZSI6ImtyaXNobmEyIiwidHlwZSI6ImFkbWluIiwiaWF0IjoxNzM3MTI0MjYzfQ.ClMqobwuhW7fVSZAcxIdlLeEshhGF0HD537l1nFYFhs",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NzgyNjZmZTlhMzUyMTMyMWQ0ZDE1OTEiLCJ1c2VybmFtZSI6ImtyaXNobmF1c2VyMiIsInR5cGUiOiJ1c2VyIiwiaWF0IjoxNzM3Mjk2NTg3fQ.40gI_b5_fLBBH04oNDiTaKy6DsmLd6l8pTEXskavJRk",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NzgyOTliZDM1ZGJmMGM2NzNkOTZhNWYiLCJ1c2VybmFtZSI6ImtyaXNobmF1c2VyMyIsInR5cGUiOiJ1c2VyIiwiaWF0IjoxNzM3Mjk2NjE0fQ.Uodtw3qsnmbFwTqDalJaH4asftp3MW5CFgxhh4QSs0U",
 ];

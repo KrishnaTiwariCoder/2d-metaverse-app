@@ -29,7 +29,7 @@ const VoiceBox = ({
       {/* User Avatar/Identifier */}
       <div className="w-12 h-12 rounded-full bg-gray-700 flex items-center justify-center">
         <span className="text-gray-300 text-sm font-medium">
-          {player.name!.substring(0, 2).toUpperCase() ?? "Name"}
+          {(player.name!.substring(0, 2).toUpperCase() ?? "Name", player.name)}
         </span>
       </div>
       {/* Username */}
