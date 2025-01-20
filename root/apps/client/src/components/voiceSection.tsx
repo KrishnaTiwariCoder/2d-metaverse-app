@@ -18,7 +18,7 @@ const VoiceSection = ({ ws, players, setPlayers, myId }: VoiceSectionProps) => {
     audioRefs.current[userId] = instance;
   };
 
-  useWebRTC({ players, myId, audioRefs, localStream, setPlayers });
+  useWebRTC({ ws, players, myId, audioRefs, localStream, setPlayers });
 
   const me = players.find((p: Player) => p.id === myId);
 

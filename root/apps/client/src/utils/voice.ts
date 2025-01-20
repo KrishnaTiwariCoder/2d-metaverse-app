@@ -1,10 +1,10 @@
 import { useEffect } from "react";
-// import freeice from "freeice";
+import freeice from "freeice";
 // import { Player } from "./arena";
 export const useWebRTC = ({
-  // ws,
+  ws,
   players,
-  // setPlayers,
+  setPlayers,
   myId,
   audioRefs,
   localStream,
@@ -65,6 +65,137 @@ export const useWebRTC = ({
   //   });
 
   // },[])
+  useEffect(() => {
+    ws.current.onmessage = (event: any) => {
+      const message = JSON.parse(event.data);
+      if (message.type === "add-peer") {
+        const { userId, createOffer } = message.payload;
+        handleNewPeer(userId, createOffer);
+      }
 
-  return;
+      async function handleNewPeer(userId: any, createOffer: boolean) {
+        const playerExist = players.find((p: any) => p.id === userId);
+        if (playerExist) {
+          return console.warn(
+            `You are already connected with ${playerExist.name})`
+          );
+        }
+        console.log(createOffer);
+        // Store i  t to connections
+        setPlayers((prev: any) => {
+          const updated = prev.map((p: any) => {
+            if (p.id === userId) {
+              p.connection = new RTCPeerConnection({
+                iceServers: freeice(),
+              });
+              p.connection.onicecandidate = (event: any) => {
+                ws.current.send("relay-ice", {
+                  userId,
+                  icecandidate: event.candidate,
+                });
+                p.connection.ontrack = ({ streams: [remoteStream] }: any) => {
+                  if (audioRefs.current[p.id]) {
+                    audioRefs.current[p.id].srcObject = remoteStream;
+                  } else {
+                    let settled = false;
+                    const interval = setInterval(() => {
+                      if (audioRefs.current[p.id]) {
+                        audioRefs.current[p.id].srcObject = remoteStream;
+                        settled = true;
+                      }
+
+                      if (settled) {
+                        clearInterval(interval);
+                      }
+                    }, 300);
+                  }
+                };
+              };
+
+              return { ...p };
+            }
+            return p;
+          });
+          return [...updated];
+        });
+
+        // connections.current[peerId] = new RTCPeerConnection({
+        //     iceServers: freeice(),
+        // });
+
+        // Handle new ice candidate on this peer connection
+
+        // connections.current[peerId].onicecandidate = (event) => {
+        //     socket.current.emit(ACTIONS.RELAY_ICE, {
+        //         peerId,
+        //         icecandidate: event.candidate,
+        //     });
+        // };
+
+        // Handle on track event on this connection
+        // connections.current[peerId].ontrack = ({
+        //     streams: [remoteStream],
+        // }) => {
+        //     addNewClient({ ...p, muted: true }, () => {
+        //         // get current users mute info
+        //         const currentUser = clientsRef.current.find(
+        //             (client) => client.id === user.id
+        //         );
+        //         if (currentUser) {
+        //             socket.current.emit(ACTIONS.MUTE_INFO, {
+        //                 userId: user.id,
+        //                 roomId,
+        //                 isMute: currentUser.muted,
+        //             });
+        //         }
+        //         if (audioRefs.current[p.id]) {
+        //             audioRefs.current[p.id].srcObject =
+        //                 remoteStream;
+        //         } else {
+        //             let settled = false;
+        //             const interval = setInterval(() => {
+        //                 if (audioRefs.current[p.id]) {
+        //                     audioRefs.current[
+        //                         p.id
+        //                     ].srcObject = remoteStream;
+        //                     settled = true;
+        //                 }
+
+        //                 if (settled) {
+        //                     clearInterval(interval);
+        //                 }
+        //             }, 300);
+        //         }
+        //     });
+        // };
+
+        // Add connection to peer connections track
+        // localMediaStream.current.getTracks().forEach((track) => {
+        //     connections.current[peerId].addTrack(
+        //         track,
+        //         localMediaStream.current
+        //     );
+        // });
+
+        // // Create an offer if required
+        // if (createOffer) {
+        //     const offer = await connections.current[
+        //         peerId
+        //     ].createOffer();
+
+        //     // Set as local description
+        //     await connections.current[peerId].setLocalDescription(
+        //         offer
+        //     );
+
+        //     // send offer to the server
+        //     socket.current.emit(ACTIONS.RELAY_SDP, {
+        //         peerId,
+        //         sessionDescription: offer,
+        //     });
+        // }
+      }
+    };
+  }, []);
+  // return;
 };
