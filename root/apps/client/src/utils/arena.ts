@@ -1,5 +1,5 @@
 import { Message } from "../components/ChatBox";
-
+// import useWebRTC from "./voice";
 export interface Player {
   id: string;
   x: number; // spawn.x
@@ -37,12 +37,12 @@ export const sendMessage = (message: any, wsRef: any) => {
 
 export const handleServerMessage = (
   message: any,
-  setCurrentPosition: any,
-  setSpaceDimensions: any,
-  setPlayers: any,
-  setMyId: any,
-  setMessages: any,
-  setError: any
+  setCurrentPosition?: any,
+  setSpaceDimensions?: any,
+  setPlayers?: any,
+  setMyId?: any,
+  setMessages?: any,
+  setError?: any
 ) => {
   switch (message.type) {
     case "space-joined": {
@@ -174,6 +174,12 @@ export const handleServerMessage = (
       });
       break;
     }
+    // case "add-peer": {
+    //   const { userId, createOffer } = message.payload;
+    //   // const { handleNewPeer } = useWebRTC();
+    //   handleNewPeer(userId, createOffer);
+    //   break;
+    // }
   }
 };
 

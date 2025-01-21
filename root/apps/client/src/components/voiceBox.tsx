@@ -18,10 +18,10 @@ const VoiceBox = ({
         w-40 h-40
       `}
     >
-      <audio
+      {/* <audio
         autoPlay
         ref={(instance) => provideRef(instance, player.id)}
-      ></audio>
+      ></audio> */}
       <video
         autoPlay
         ref={(instance) => provideRef(instance, player.id)}
@@ -29,12 +29,13 @@ const VoiceBox = ({
       {/* User Avatar/Identifier */}
       <div className="w-12 h-12 rounded-full bg-gray-700 flex items-center justify-center">
         <span className="text-gray-300 text-sm font-medium">
-          {(player.name!.substring(0, 2).toUpperCase() ?? "Name", player.name)}
+          {/* {(player.name!.substring(0, 2).toUpperCase() ?? "Name")} */}
+          {player.name}
         </span>
       </div>
       {/* Username */}
       <span className="text-sm text-gray-300 truncate w-full text-center">
-        {player.name}
+        {/* {player.name} */}
       </span>
       {/* Controls */}
 

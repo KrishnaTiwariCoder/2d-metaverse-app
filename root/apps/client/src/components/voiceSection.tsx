@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import { Player } from "../utils/arena";
 import VoiceBox from "./VoiceBox";
-import { useWebRTC } from "../utils/voice";
+import useWebRTC from "../utils/voice";
 
 interface VoiceSectionProps {
   ws: any;
@@ -18,7 +18,14 @@ const VoiceSection = ({ ws, players, setPlayers, myId }: VoiceSectionProps) => {
     audioRefs.current[userId] = instance;
   };
 
-  useWebRTC({ ws, players, myId, audioRefs, localStream, setPlayers });
+  useWebRTC({
+    ws,
+    players,
+    myId,
+    audioRefs,
+    localStream,
+    setPlayers,
+  });
 
   const me = players.find((p: Player) => p.id === myId);
 

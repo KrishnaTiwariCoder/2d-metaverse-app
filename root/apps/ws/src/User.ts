@@ -59,16 +59,6 @@ export class User {
               spawnY: number = Math.floor(Math.random() * spaceFound.height);
 
             // this code ensures that if the user already is in the space, they spawn at the position they were in
-            // if (spaceMembers?.find((u) => u.userId === this.userId)) {
-            //   this.send({
-            //     type: "already-in-space",
-            //     payload: {
-            //       x: this.x,
-            //       y: this.y,
-            //     },
-            //   });
-            //   return;
-            // }
 
             // this code ensures that the user doesn't spawn on top of another user
             let userExistAtThatCoordinate = spaceMembers?.find(
@@ -98,6 +88,7 @@ export class User {
             this.isDeafened = false;
 
             RoomManager.getInstance().addUser(spaceId, this);
+
             this.send({
               type: "space-joined",
               payload: {
@@ -136,6 +127,32 @@ export class User {
               this,
               this.spaceId!
             );
+            // tell everyone in the room that im going to share you my stream
+            RoomManager.getInstance().broadcast(
+              {
+                type: "add-peer",
+                payload: {
+                  userId: this.userId,
+                  createOffer: false,
+                  user: this,
+                },
+              },
+              this,
+              this.spaceId!
+            );
+            RoomManager.getInstance()
+              .rooms.get(this.spaceId!)
+              ?.filter((client) => client.userId !== this.userId)
+              ?.forEach((client: User) => {
+                this.send({
+                  type: "add-peer",
+                  payload: {
+                    userId: client.userId,
+                    createOffer: true,
+                    user: client,
+                  },
+                });
+              });
             break;
           case "move":
             const { x: MoveX, y: MoveY } = parsedData.payload;
