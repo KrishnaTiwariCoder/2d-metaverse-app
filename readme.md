@@ -19,8 +19,8 @@ This 2D metaverse application provides an innovative online collaborative worksp
   - Granular admin permissions
 - **Seamless 2DEnvironments** 🎨: Transition between collaborative 2D virtual spaces and detailed interior scenes
 
-![Collaborative 3D Virtual Environment](/assets/1645616741443.png)
-_Collaborative 3D virtual environment with customizable avatars and meeting spaces_
+![Collaborative 2D Virtual Environment](/assets/1645616741443.png)
+_Collaborative 2D virtual environment with customizable avatars and meeting spaces_
 
 ## 🛠 Technology Stack
 
@@ -61,15 +61,15 @@ _Collaborative 3D virtual environment with customizable avatars and meeting spac
 1. Clone the repository
 
    ```bash
-   git clone https://github.com/[your-username]/2d-metaverse-workspace.git
+   git clone https://github.com/[your-username]/2d-metaverse-workspace.
    ```
 
 2. Install dependencies
 
    ```bash
    cd 2d-metaverse-workspace
-   cd http-server
-   npm install
+   cd root
+   npm install && npm run build
    ```
 
 3. Set up environment variables
