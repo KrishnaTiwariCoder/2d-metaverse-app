@@ -34,7 +34,7 @@ export class User {
       this.ws.on("message", async (data) => {
         const parsedData = JSON.parse(data.toString());
         switch (parsedData.type) {
-          case "join":
+          case "join": {
             const { spaceId, token } = parsedData.payload;
             const { _id: userId, username: name } = jwt.verify(
               token,
@@ -154,7 +154,8 @@ export class User {
                 });
               });
             break;
-          case "move":
+          }
+          case "move": {
             const { x: MoveX, y: MoveY } = parsedData.payload;
             const xDisplacement = Math.abs(MoveX - this.x);
             const yDisplacement = Math.abs(MoveY - this.y);
@@ -230,7 +231,8 @@ export class User {
                 },
               });
             }
-          case "send-message":
+          }
+          case "send-message": {
             const message = parsedData.payload;
             RoomManager.getInstance().broadcast(
               {
@@ -244,6 +246,7 @@ export class User {
               this,
               this.spaceId!
             );
+          }
           case "mute": {
             if (this.userId !== parsedData.payload.userId) return;
             this.isMuted = true;
@@ -305,6 +308,37 @@ export class User {
               this.spaceId!
             );
             break;
+          }
+          case "relay-ice": {
+            const { userId, icecandidate } = parsedData;
+
+            console.log(userId);
+
+            RoomManager.getInstance()
+              .rooms.get(this.spaceId!)
+              ?.find((user: User) => user.userId === userId)
+              ?.ws.send(
+                JSON.stringify({
+                  type: "ice-candidate",
+                  payload: {
+                    icecandidate,
+                  },
+                })
+              );
+          }
+          case "relay-sdp": {
+            const { userId, sessionDesciption } = parsedData;
+            RoomManager.getInstance()
+              .rooms.get(this.spaceId!)
+              ?.find((user: User) => user.userId === userId)
+              ?.ws.send(
+                JSON.stringify({
+                  type: "sdp",
+                  payload: {
+                    sdp: sessionDesciption,
+                  },
+                })
+              );
           }
         }
       });

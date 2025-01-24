@@ -18,7 +18,6 @@ const useWebRTC = ({
   localStream: any;
 }) => {
   // capture media
-
   useEffect(() => {
     const startCapture = async () => {
       try {
@@ -38,6 +37,10 @@ const useWebRTC = ({
       })
       .catch(() => {});
   }, [audioRefs, myId]);
+
+  useEffect(() => {
+    console.log(localStream.current, "changed");
+  }, [localStream.current]);
 
   useEffect(() => {
     if (!ws.current) return;
@@ -79,10 +82,12 @@ const useWebRTC = ({
                 }, 300);
               }
             };
-            console.log(localStream.current);
-            // localStream.current.getTracks().forEach((track: any) => {
-            //   p.connection!.addTrack(track, localStream.current);
-            // });
+
+            if (localStream.current) {
+              localStream.current.getTracks().forEach((track: any) => {
+                p.connection!.addTrack(track, localStream.current);
+              });
+            }
             if (createOffer) {
               p.connection.createOffer().then((offer) => {
                 // Set as local description
@@ -99,7 +104,7 @@ const useWebRTC = ({
                 );
               });
             }
-            // return p;
+            return { ...p };
           }
           return p;
         });
@@ -117,7 +122,7 @@ const useWebRTC = ({
         }
       }
     });
-  }, [ws.current, localStream.current]);
+  }, [ws.current, audioRefs, localStream]);
 
   // return handleNewPeer;
 };
