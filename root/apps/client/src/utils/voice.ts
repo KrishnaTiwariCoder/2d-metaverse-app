@@ -1,7 +1,7 @@
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import freeice from "freeice";
 import { Player } from "./arena";
-// import { Player } from "./arena";
+
 const useWebRTC = ({
   ws,
   players,
@@ -23,108 +23,211 @@ const useWebRTC = ({
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
           audio: true,
-          video: true,
+          video: false,
         });
+
         localStream.current = stream;
+        if (audioRefs.current[myId]) {
+          audioRefs.current[myId].volume = 0;
+          audioRefs.current[myId].srcObject = stream;
+        }
       } catch (err) {
         console.error("Error accessing local media stream", err);
       }
     };
-    startCapture()
-      .then(() => {
-        audioRefs.current[myId].volume = 0;
-        audioRefs.current[myId].srcObject = localStream.current;
-      })
-      .catch(() => {});
-  }, [audioRefs, myId]);
+    startCapture().catch(() => {});
+  }, [myId]);
 
-  useEffect(() => {
-    console.log(localStream.current, "changed");
-  }, [localStream.current]);
+  const sendIceCandidate = useCallback(
+    (userId: string, candidate: RTCIceCandidate) => {
+      if (ws.current && candidate) {
+        ws.current.send(
+          JSON.stringify({
+            type: "ice-candidate",
+            payload: {
+              userId,
+              iceCandidate: {
+                candidate: candidate.candidate,
+                sdpMid: candidate.sdpMid,
+                sdpMLineIndex: candidate.sdpMLineIndex,
+              },
+            },
+          })
+        );
+      }
+    },
+    [ws]
+  );
+
+  const createPeerConnection = useCallback(
+    (userId: any) => {
+      const connection = new RTCPeerConnection({
+        iceServers: freeice(),
+        iceCandidatePoolSize: 10,
+      });
+
+      connection.onicecandidate = (event) => {
+        if (event.candidate) {
+          sendIceCandidate(userId, event.candidate);
+        }
+      };
+
+      connection.ontrack = ({ streams: [remoteStream] }: any) => {
+        const audioElement = audioRefs.current[userId];
+
+        if (audioElement) {
+          audioElement.srcObject = remoteStream;
+        } else {
+          // let settled = false;
+          // const interval = setInterval(() => {
+          //   if (audioElement) {
+          //     audioElement.srcObject = remoteStream;
+          //     settled = true;
+          //   }
+          //   if (settled) {
+          //     clearInterval(interval);
+          //   }
+          // }, 300);
+        }
+      };
+
+      // Add local stream tracks if available
+      if (localStream.current) {
+        localStream.current.getTracks().forEach((track: any) => {
+          connection.addTrack(track, localStream.current);
+        });
+      }
+
+      return connection;
+    },
+    [localStream, audioRefs, sendIceCandidate]
+  );
+
+  const handleNewPeer = async (userId: any, createOffer: boolean) => {
+    console.log(userId, createOffer);
+    const playerExist = players.find((p: any) => p.id === userId);
+    if (playerExist && playerExist.connection) {
+      return console.warn(
+        `You are already connected with ${playerExist.name})`
+      );
+    }
+
+    setPlayers((prev: Player[]) => {
+      return prev.map((p: Player) => {
+        if (p.id === userId) {
+          return { ...p, connection: createPeerConnection(userId) };
+        }
+        return p;
+      });
+    });
+
+    if (createOffer) {
+      const player = players.find((p: Player) => p.id === userId);
+      if (player?.connection) {
+        try {
+          const offer = await player.connection.createOffer();
+          await player.connection.setLocalDescription(offer);
+
+          ws.current.send(
+            JSON.stringify({
+              type: "relay-sdp",
+              payload: {
+                userId,
+                sdp: offer,
+              },
+            })
+          );
+        } catch (error) {
+          console.error("Offer creation error:", error);
+        }
+      }
+    }
+  };
+
+  const handleIceCandidate = async (
+    userId: string,
+    iceCandidate: RTCIceCandidate
+  ) => {
+    const player = players.find((p: Player) => p.id === userId);
+    if (player?.connection) {
+      try {
+        await player.connection.addIceCandidate(
+          new RTCIceCandidate(iceCandidate)
+        );
+      } catch (error) {
+        console.error("ICE candidate error:", error);
+      }
+    }
+  };
+
+  const handleRemoteSdp = async (
+    userId: string,
+    remoteSdp: RTCSessionDescription
+  ) => {
+    const player = players.find((p: Player) => p.id === userId);
+    if (!player?.connection) return;
+    try {
+      await player.connection.setRemoteDescription(
+        new RTCSessionDescription(remoteSdp)
+      );
+
+      if (remoteSdp.type === "offer") {
+        const answer = await player.connection.createAnswer();
+        await player.connection.setLocalDescription(answer);
+
+        ws.current.send(
+          JSON.stringify({
+            type: "relay-sdp",
+            payload: {
+              userId,
+              sessionDescription: answer,
+            },
+          })
+        );
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   useEffect(() => {
     if (!ws.current) return;
 
-    const handleNewPeer = async (userId: any, createOffer: boolean) => {
-      const playerExist = players.find((p: any) => p.id === userId);
-      if (playerExist && playerExist.connection) {
-        return console.warn(
-          `You are already connected with ${playerExist.name})`
-        );
-      }
-      // Store i  t to connections
-      setPlayers((prev: any) => {
-        const updated = prev.map((p: Player) => {
-          if (p.id === userId) {
-            p.connection = new RTCPeerConnection({
-              iceServers: freeice(),
-            });
-            p.connection.onicecandidate = (event: any) => {
-              ws.current.send("relay-ice", {
-                userId,
-                icecandidate: event.candidate,
-              });
-            };
-            p.connection.ontrack = ({ streams: [remoteStream] }: any) => {
-              if (audioRefs.current[p.id]) {
-                audioRefs.current[p.id].srcObject = remoteStream;
-              } else {
-                let settled = false;
-                const interval = setInterval(() => {
-                  if (audioRefs.current[p.id]) {
-                    audioRefs.current[p.id].srcObject = remoteStream;
-                    settled = true;
-                  }
-
-                  if (settled) {
-                    clearInterval(interval);
-                  }
-                }, 300);
-              }
-            };
-
-            if (localStream.current) {
-              localStream.current.getTracks().forEach((track: any) => {
-                p.connection!.addTrack(track, localStream.current);
-              });
-            }
-            if (createOffer) {
-              p.connection.createOffer().then((offer) => {
-                // Set as local description
-                p.connection!.setLocalDescription(offer);
-                // send offer to the server
-                ws.current.send(
-                  JSON.stringify({
-                    type: "relay-sdp",
-                    payload: {
-                      userId,
-                      sessionDesciption: offer,
-                    },
-                  })
-                );
-              });
-            }
-            return { ...p };
-          }
-          return p;
-        });
-        return [...updated];
-      });
-    };
-
-    ws.current.addEventListener("message", (event: any) => {
+    const handleMessage = async (event: any) => {
       const message = JSON.parse(event.data);
+
       switch (message.type) {
         case "add-peer": {
           const { userId, createOffer } = message.payload;
-          handleNewPeer(userId, createOffer);
+          await handleNewPeer(userId, createOffer);
+          break;
+        }
+        case "ice-candidate": {
+          const { userId, icecandidate } = message.payload;
+          await handleIceCandidate(userId, icecandidate);
+          break;
+        }
+        case "sdp": {
+          const { userId, sdp } = message.payload;
+          await handleRemoteSdp(userId, sdp);
           break;
         }
       }
-    });
-  }, [ws.current, audioRefs, localStream]);
+    };
 
-  // return handleNewPeer;
+    ws.current.addEventListener("message", handleMessage);
+
+    return () => ws.current.removeEventListener("message", handleMessage);
+  }, [players, ws]);
+
+  return {
+    ws,
+    players,
+    setPlayers,
+    myId,
+    audioRefs,
+    localStream,
+  };
 };
 
 export default useWebRTC;

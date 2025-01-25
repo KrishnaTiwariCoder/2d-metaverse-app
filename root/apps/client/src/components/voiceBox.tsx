@@ -18,14 +18,14 @@ const VoiceBox = ({
         w-40 h-40
       `}
     >
-      {/* <audio
+      <audio
         autoPlay
         ref={(instance) => provideRef(instance, player.id)}
-      ></audio> */}
-      <video
+      ></audio>
+      {/* <video
         autoPlay
         ref={(instance) => provideRef(instance, player.id)}
-      ></video>
+      ></video> */}
       {/* User Avatar/Identifier */}
       <div className="w-12 h-12 rounded-full bg-gray-700 flex items-center justify-center">
         <span className="text-gray-300 text-sm font-medium">

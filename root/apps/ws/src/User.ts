@@ -33,6 +33,9 @@ export class User {
     try {
       this.ws.on("message", async (data) => {
         const parsedData = JSON.parse(data.toString());
+        console.log(parsedData);
+        console.log("------------------------------------------------");
+        // return;
         switch (parsedData.type) {
           case "join": {
             const { spaceId, token } = parsedData.payload;
@@ -231,6 +234,7 @@ export class User {
                 },
               });
             }
+            break;
           }
           case "send-message": {
             const message = parsedData.payload;
@@ -246,6 +250,7 @@ export class User {
               this,
               this.spaceId!
             );
+            break;
           }
           case "mute": {
             if (this.userId !== parsedData.payload.userId) return;
@@ -310,9 +315,12 @@ export class User {
             break;
           }
           case "relay-ice": {
-            const { userId, icecandidate } = parsedData;
+            const { userId, icecandidate } = parsedData.payload;
 
-            console.log(userId);
+            if (!userId || !icecandidate) {
+              console.error("Invalid ICE candidate relay");
+              return;
+            }
 
             RoomManager.getInstance()
               .rooms.get(this.spaceId!)
@@ -322,12 +330,19 @@ export class User {
                   type: "ice-candidate",
                   payload: {
                     icecandidate,
+                    userId: this.userId,
                   },
                 })
               );
+            break;
           }
           case "relay-sdp": {
-            const { userId, sessionDesciption } = parsedData;
+            const { userId, sessionDesciption } = parsedData.payload;
+            // console.log(userId, sessionDesciption);
+            console.log(`Relaying SDP for user: ${userId}`, {
+              sdpType: sessionDesciption.type,
+              sdpSize: sessionDesciption.sdp.length,
+            });
             RoomManager.getInstance()
               .rooms.get(this.spaceId!)
               ?.find((user: User) => user.userId === userId)
@@ -335,10 +350,12 @@ export class User {
                 JSON.stringify({
                   type: "sdp",
                   payload: {
-                    sdp: sessionDesciption,
+                    sdp: sessionDesciption.sdp,
+                    userId: this.userId,
                   },
                 })
               );
+            break;
           }
         }
       });
