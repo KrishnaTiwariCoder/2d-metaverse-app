@@ -12,18 +12,15 @@ interface VoiceSectionProps {
 
 const VoiceSection = ({ ws, players, setPlayers, myId }: VoiceSectionProps) => {
   const audioRefs = useRef<any>({});
-  const localStream = useRef<any>(null);
 
   const provideRef = (instance: any, userId: string) => {
     audioRefs.current[userId] = instance;
   };
-
   useWebRTC({
     ws,
     players,
     myId,
     audioRefs,
-    localStream,
     setPlayers,
   });
 

@@ -315,6 +315,9 @@ export class User {
             break;
           }
           case "relay-ice": {
+            // console.log("hit the relay ice here are the detais");
+            // console.log("------------------------------------------------");
+            // console.log(parsedData.payload);
             const { userId, icecandidate } = parsedData.payload;
 
             if (!userId || !icecandidate) {
@@ -337,12 +340,12 @@ export class User {
             break;
           }
           case "relay-sdp": {
-            const { userId, sessionDesciption } = parsedData.payload;
+            const { userId, sdp } = parsedData.payload;
             // console.log(userId, sessionDesciption);
-            console.log(`Relaying SDP for user: ${userId}`, {
-              sdpType: sessionDesciption.type,
-              sdpSize: sessionDesciption.sdp.length,
-            });
+            // console.log(`Relaying SDP for user: ${userId}`, {
+            //   sdpType: sessionDesciption.type,
+            //   sdpSize: sessionDesciption.sdp.length,
+            // });
             RoomManager.getInstance()
               .rooms.get(this.spaceId!)
               ?.find((user: User) => user.userId === userId)
@@ -350,7 +353,7 @@ export class User {
                 JSON.stringify({
                   type: "sdp",
                   payload: {
-                    sdp: sessionDesciption.sdp,
+                    sdp: sdp,
                     userId: this.userId,
                   },
                 })

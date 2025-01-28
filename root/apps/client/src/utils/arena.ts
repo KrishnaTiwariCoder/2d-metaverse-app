@@ -52,7 +52,7 @@ export const handleServerMessage = (
         width: message.payload.width,
         height: message.payload.height,
       });
-      setPlayers(() => [...users]);
+      setPlayers([...users]);
       setMyId(myId);
       break;
     }
