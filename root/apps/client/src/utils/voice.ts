@@ -22,11 +22,12 @@ const useWebRTC = ({
         audio: true,
         video: false,
       });
-
       localStream.current = stream;
+
       if (audioRefs.current[myId]) {
-        audioRefs.current[myId].volume = 0;
         audioRefs.current[myId].srcObject = stream;
+        audioRefs.current[myId].volume = 0; // Mute your own audio to avoid echo
+        audioRefs.current[myId].play();
       }
     } catch (err) {
       console.error("Error accessing local media stream:", err);
@@ -74,23 +75,33 @@ const useWebRTC = ({
         }
       };
 
-      // Handle incoming tracks
-      connection.ontrack = ({ streams: [remoteStream] }) => {
+      // Handle incoming remote tracks
+      connection.ontrack = (event) => {
+        const [remoteStream] = event.streams;
         const audioElement = audioRefs.current[userId];
+
+        console.log(
+          "when we joined the other room members add our stream to thier audioRefs ",
+          audioElement,
+          remoteStream
+        );
+
         if (audioElement && remoteStream) {
           audioElement.srcObject = remoteStream;
+          audioElement.play().catch((error) => {
+            console.error("Error playing remote audio:", error);
+          });
         }
       };
 
-      // Add local stream tracks to the connection
+      // Add local tracks to the connection
+      // create a time interval so that until the addTracks is over the function shouold not proceed
+
       if (localStream.current) {
         localStream.current.getTracks().forEach((track) => {
           connection.addTrack(track, localStream.current!);
+          console.log(track, localStream.current);
         });
-      } else {
-        console.warn(
-          "Local stream is not initialized when creating the connection."
-        );
       }
 
       return connection;
@@ -100,40 +111,38 @@ const useWebRTC = ({
 
   const handleNewPeer = useCallback(
     async (userId: string, createOffer: boolean) => {
-      const playerExist = players.find((p) => p.id === userId);
-      if (playerExist?.connection) {
-        console.warn(`You are already connected with ${playerExist.name}`);
+      const existingPlayer = players.find((p) => p.id === userId);
+      if (existingPlayer?.connection) {
+        console.warn(`Already connected to ${existingPlayer.name}`);
         return;
       }
 
-      const newConnection = createPeerConnection(userId);
+      const connection = createPeerConnection(userId);
 
       setPlayers((prev) =>
-        prev.map((p) =>
-          p.id === userId ? { ...p, connection: newConnection } : p
-        )
+        prev.map((p) => (p.id === userId ? { ...p, connection } : p))
       );
 
       if (createOffer) {
         try {
-          const offer = await newConnection.createOffer();
-          await newConnection.setLocalDescription(offer);
+          const offer = await connection.createOffer();
+          await connection.setLocalDescription(offer);
 
           ws.current?.send(
             JSON.stringify({
               type: "relay-sdp",
               payload: {
                 userId,
-                sdp: offer,
+                sdp: connection.localDescription,
               },
             })
           );
-        } catch (error) {
-          console.error("Offer creation error:", error);
+        } catch (err) {
+          console.error("Error creating offer:", err);
         }
       }
     },
-    [players, createPeerConnection, ws]
+    [createPeerConnection, players, setPlayers, ws]
   );
 
   const handleIceCandidate = useCallback(
@@ -141,9 +150,11 @@ const useWebRTC = ({
       const player = players.find((p) => p.id === userId);
       if (player?.connection) {
         try {
-          await player.connection.addIceCandidate(iceCandidate);
-        } catch (error) {
-          console.error("ICE candidate error:", error);
+          await player.connection.addIceCandidate(
+            new RTCIceCandidate(iceCandidate)
+          );
+        } catch (err) {
+          console.error("Error adding ICE candidate:", err);
         }
       }
     },
@@ -151,7 +162,7 @@ const useWebRTC = ({
   );
 
   const handleRemoteSdp = useCallback(
-    async (userId: string, remoteSdp: RTCSessionDescriptionInit) => {
+    async (userId: string, remoteSdp: RTCSessionDescription) => {
       const player = players.find((p) => p.id === userId);
       if (!player?.connection) {
         console.warn(`Connection not found for user: ${userId}`);
@@ -175,8 +186,8 @@ const useWebRTC = ({
             })
           );
         }
-      } catch (error) {
-        console.error("Remote SDP error:", error);
+      } catch (err) {
+        console.error("Error handling remote SDP:", err);
       }
     },
     [players, ws]
@@ -205,15 +216,15 @@ const useWebRTC = ({
           break;
         }
         default:
-          console.warn("Unknown message type:", message.type);
+          console.warn(`Unknown message type: ${message.type}`);
       }
     };
 
     ws.current.addEventListener("message", handleMessage);
     return () => ws.current?.removeEventListener("message", handleMessage);
-  }, [handleNewPeer, handleIceCandidate, handleRemoteSdp, ws]);
+  }, [ws, handleNewPeer, handleIceCandidate, handleRemoteSdp]);
 
-  return { localStream };
+  return null;
 };
 
 export default useWebRTC;
