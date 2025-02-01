@@ -341,11 +341,7 @@ export class User {
           }
           case "relay-sdp": {
             const { userId, sdp } = parsedData.payload;
-            // console.log(userId, sessionDesciption);
-            // console.log(`Relaying SDP for user: ${userId}`, {
-            //   sdpType: sessionDesciption.type,
-            //   sdpSize: sessionDesciption.sdp.length,
-            // });
+
             RoomManager.getInstance()
               .rooms.get(this.spaceId!)
               ?.find((user: User) => user.userId === userId)

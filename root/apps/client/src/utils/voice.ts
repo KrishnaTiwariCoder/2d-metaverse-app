@@ -126,7 +126,9 @@ const useWebRTC = ({
       if (createOffer) {
         try {
           const offer = await connection.createOffer();
-          await connection.setLocalDescription(offer);
+          await connection.setLocalDescription(
+            new RTCSessionDescription(offer)
+          );
 
           ws.current?.send(
             JSON.stringify({
