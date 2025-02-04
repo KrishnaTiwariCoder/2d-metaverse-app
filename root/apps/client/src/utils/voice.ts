@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef } from "react";
 import { Player } from "./arena";
+import freeice from "freeice";
 
 const useWebRTC = ({
   ws,
@@ -62,10 +63,7 @@ const useWebRTC = ({
   const createPeerConnection = useCallback(
     (userId: string) => {
       const connection = new RTCPeerConnection({
-        iceServers: [
-          { urls: "stun:stun.stunprotocol.org:3478" },
-          { urls: "stun:stun1.l.google.com:19302" },
-        ],
+        iceServers: freeice(),
       });
 
       // Handle ICE candidates
@@ -88,21 +86,19 @@ const useWebRTC = ({
 
         if (audioElement && remoteStream) {
           audioElement.srcObject = remoteStream;
-          audioElement.play().catch((error) => {
-            console.error("Error playing remote audio:", error);
-          });
         }
       };
 
       // Add local tracks to the connection
-      // create a time interval so that until the addTracks is over the function shouold not proceed
-
       if (localStream.current) {
         localStream.current.getTracks().forEach((track) => {
           connection.addTrack(track, localStream.current!);
+          console.log("--------------------------------------");
           console.log(track, localStream.current);
+          console.log("--------------------------------------");
         });
       }
+      // create a time interval so that until the addTracks is over the function shouold not proceed
 
       return connection;
     },

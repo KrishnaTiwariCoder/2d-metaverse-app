@@ -60,7 +60,7 @@ const Arena = () => {
   // Setup WebSocket connection
   const setupWebSocket = () => {
     try {
-      wsRef.current = new WebSocket("ws://192.168.0.104:3001");
+      wsRef.current = new WebSocket("ws://192.168.0.107:3001");
       wsRef.current.onopen = async () => {
         console.log("WebSocket connected");
         setConnectionStatus("connected");
@@ -108,7 +108,6 @@ const Arena = () => {
 
   useEffect(() => {
     if (!token || !spaceId) return;
-
     setupWebSocket();
 
     return () => {
