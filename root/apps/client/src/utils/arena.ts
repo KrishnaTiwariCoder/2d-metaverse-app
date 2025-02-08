@@ -54,10 +54,6 @@ export const handleServerMessage = (message: any) => {
     }
     case "movement": {
       const { userId, x, y } = message.payload;
-
-      // const payload = players.map((p: Player) =>
-      //   p.id == userId ? { ...p, x, y } : { ...p }
-      // );
       const toAdd = {
         ...players.find((p: Player) => p.id == userId),
         x,
