@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
 import { Message, send } from "../redux/chatSlice";
 
-const ChatBox = () => {
+const ChatBox = ({ wsRef }: any) => {
   const [newMessage, setNewMessage] = useState("");
   const currentUser = useSelector((state: any) => state.auth.currentUser);
   const messages = useSelector((state: any) => state.chats.messages);
@@ -24,7 +24,7 @@ const ChatBox = () => {
         senderName: currentUser.name,
       };
       dispatch(send(message));
-      sendMessage(message);
+      sendMessage(message, wsRef);
       setNewMessage("");
     }
   };

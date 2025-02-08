@@ -1,7 +1,7 @@
 import { useRef } from "react";
-import { Player } from "../utils/arena";
 // import VoiceBox from "./VoiceBox";
 import useWebRTC from "../utils/voice";
+import { Player } from "../redux/playerSlice";
 
 interface VoiceSectionProps {
   ws: any;

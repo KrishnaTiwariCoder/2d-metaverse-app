@@ -6,7 +6,7 @@ import https from "https";
 // const server = https.createServer();
 
 const wss = new WebSocketServer({ port: 3001 });
-connectDB();
+// connectDB();
 
 wss.on("connection", function connection(ws) {
   console.log("user connected");

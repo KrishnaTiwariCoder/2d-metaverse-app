@@ -1,12 +1,12 @@
 import { useEffect, useRef } from "react";
-import { getStatusColor, tokens } from "../utils/arena";
+import { getStatusColor, handleServerMessage, tokens } from "../utils/arena";
 import Canvas from "../components/Canvas";
 import ChatRoom from "../components/ChatBox";
 import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
 import { setConnectionStatus, setError, setSpaceId } from "../redux/gameSlice";
 import { storeToken } from "../redux/authSlice";
-import { connectWebSocket, getWebSocket } from "../utils/websocket";
+import { getWebSocket } from "../utils/websocket";
 
 const Arena = () => {
   const token = useSelector((state: any) => state.auth.token);
@@ -39,12 +39,33 @@ const Arena = () => {
   // Setup WebSocket connection
   const setupWebSocket = () => {
     try {
-      localWsRef.current = connectWebSocket("ws://192.168.0.107:3001");
+      localWsRef.current = new WebSocket("ws://192.168.215.115:3001");
 
-      if (localWsRef.current) {
+      localWsRef.current.onopen = async () => {
         dispatch(setConnectionStatus("connected"));
         dispatch(setError(""));
-      }
+        console.log("WebSocket connected");
+        localWsRef.current?.send(
+          JSON.stringify({
+            type: "join",
+            payload: {
+              spaceId: localStorage.getItem("spaceId"),
+              token: localStorage.getItem("token"),
+            },
+          })
+        );
+      };
+      localWsRef.current.onmessage = handleServerMessage;
+      localWsRef.current.onerror = (error) => {
+        dispatch(setConnectionStatus("error"));
+        console.error("WebSocket error:", error);
+      };
+      localWsRef.current.onclose = () => {
+        console.log("WebSocket closed");
+        dispatch(setConnectionStatus("disconnected"));
+        //  socket = null; // Reset on close
+        localWsRef.current = null;
+      };
     } catch (err) {
       console.error("WebSocket setup error:", err);
       dispatch(setError("Failed to initialize game connection"));
@@ -82,7 +103,8 @@ const Arena = () => {
 
       ctx.beginPath();
       ctx.arc(x, y, 20, 0, Math.PI * 2);
-      ctx.fillStyle = id === myId ? "#4f46e5" : "#64748b";
+      ctx.fillStyle =
+        id == localStorage.getItem("myId") ? "#4f46e5" : "#64748b";
       ctx.fill();
       ctx.closePath();
     });
@@ -133,7 +155,7 @@ const Arena = () => {
       </div>
       <div className="flex-1 bg-gray-800 rounded-lg border border-gray-700">
         <div className="flex items-center justify-center w-full h-full min-h-[400px] p-4">
-          <Canvas canvasRef={canvasRef} />
+          <Canvas canvasRef={canvasRef} wsRef={localWsRef} />
           <div>
             <ChatRoom />
           </div>

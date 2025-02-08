@@ -17,9 +17,7 @@ interface PlayerState {
 }
 
 // Initial state
-const initialState: PlayerState = {
-  players: [],
-};
+const initialState: PlayerState = { players: [] };
 
 // Create the slice
 const playerSlice = createSlice({
@@ -35,12 +33,23 @@ const playerSlice = createSlice({
       );
     },
     setPlayers: (state, action) => {
-      state.players = [...action.payload];
+      console.log(action.payload);
+      state.players = action.payload;
+    },
+    setPlayer: (state, action) => {
+      state.players = state.players.map((p) => {
+        if (p.id === action.payload.id) {
+          return { ...action.payload };
+        } else {
+          return p;
+        }
+      });
     },
   },
 });
 
-export const { addPlayer, removeUser, setPlayers } = playerSlice.actions;
+export const { addPlayer, removeUser, setPlayers, setPlayer } =
+  playerSlice.actions;
 
 // Export reducer
 export default playerSlice.reducer;

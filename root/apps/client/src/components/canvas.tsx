@@ -1,11 +1,10 @@
 import { useEffect } from "react";
 import { useSelector } from "react-redux";
 import { appDispatch } from "../redux/store";
-import { Player, setCurrentPosition } from "../redux/gameSlice";
-import { getWebSocket } from "../utils/websocket";
-import { setPlayers } from "../redux/playerSlice";
+import { setCurrentPosition } from "../redux/gameSlice";
+import { Player, setPlayer } from "../redux/playerSlice";
 
-const Canvas = ({ canvasRef }: any) => {
+const Canvas = ({ canvasRef, wsRef }: any) => {
   const { spaceDimensions, connectionStatus, currentPosition } = useSelector(
     (state: any) => state.game
   );
@@ -37,20 +36,21 @@ const Canvas = ({ canvasRef }: any) => {
         default:
           return;
       }
-      getWebSocket()?.send(
+      wsRef.current?.send(
         JSON.stringify({
           type: "move",
           payload: { x: newX, y: newY },
         })
       );
       appDispatch(setCurrentPosition({ x: newX, y: newY }));
-      const payload = players.map((p: Player) => {
-        if (p.id === myId) {
-          return { ...p, x: newX, y: newY };
-        }
-        return p;
-      });
-      appDispatch(setPlayers([...payload]));
+
+      const toAdd = {
+        ...players.find((p: Player) => p.id == myId),
+        x: newX,
+        y: newY,
+      };
+
+      appDispatch(setPlayer(toAdd));
     };
 
     window.addEventListener("keydown", handleKeyDown);

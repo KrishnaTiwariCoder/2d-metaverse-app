@@ -8,8 +8,7 @@ import {
   setSpaceDimensions,
 } from "../redux/gameSlice";
 import { setMyId } from "../redux/authSlice";
-import { getWebSocket } from "./websocket";
-import { addPlayer, setPlayers } from "../redux/playerSlice";
+import { addPlayer, setPlayer, setPlayers } from "../redux/playerSlice";
 
 export const getStatusColor = (connectionStatus: any) => {
   switch (connectionStatus) {
@@ -26,8 +25,8 @@ export const getStatusColor = (connectionStatus: any) => {
   }
 };
 
-export const sendMessage = (message: any) => {
-  getWebSocket()!.send(
+export const sendMessage = (message: any, wsRef: any) => {
+  wsRef.current!.send(
     JSON.stringify({
       type: "send-message",
       payload: message,
@@ -50,18 +49,21 @@ export const handleServerMessage = (message: any) => {
       );
       appDispatch(setPlayers([...users]));
       appDispatch(setMyId(myId));
+      localStorage.setItem("myId", myId);
       break;
     }
     case "movement": {
       const { userId, x, y } = message.payload;
 
-      const payload = players.map((p: Player) => {
-        if (p.id == userId) {
-          return { ...p, x, y };
-        }
-        return p;
-      });
-      appDispatch(setPlayers(payload));
+      // const payload = players.map((p: Player) =>
+      //   p.id == userId ? { ...p, x, y } : { ...p }
+      // );
+      const toAdd = {
+        ...players.find((p: Player) => p.id == userId),
+        x,
+        y,
+      };
+      appDispatch(setPlayer(toAdd));
       break;
     }
     case "movement-rejected": {
@@ -78,7 +80,6 @@ export const handleServerMessage = (message: any) => {
         isSpeaking: false,
         name: message.payload.name,
       };
-
       appDispatch(addPlayer(payload));
       break;
     }
