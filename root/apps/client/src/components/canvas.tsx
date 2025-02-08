@@ -1,16 +1,18 @@
 import { useEffect } from "react";
-import { Player } from "../utils/arena";
+import { useSelector } from "react-redux";
+import { appDispatch } from "../redux/store";
+import { Player, setCurrentPosition } from "../redux/gameSlice";
+import { getWebSocket } from "../utils/websocket";
+import { setPlayers } from "../redux/playerSlice";
 
-const Canvas = ({
-  canvasRef,
-  spaceDimensions,
-  connectionStatus,
-  currentPosition,
-  wsRef,
-  setCurrentPosition,
-  setPlayers,
-  myId,
-}: any) => {
+const Canvas = ({ canvasRef }: any) => {
+  const { spaceDimensions, connectionStatus, currentPosition } = useSelector(
+    (state: any) => state.game
+  );
+
+  const players = useSelector((state: any) => state.players.players);
+
+  const myId = useSelector((state: any) => state.auth.myId);
   useEffect(() => {
     const handleKeyDown = (e: any) => {
       if (connectionStatus !== "connected") return;
@@ -35,24 +37,20 @@ const Canvas = ({
         default:
           return;
       }
-      wsRef.current?.send(
+      getWebSocket()?.send(
         JSON.stringify({
           type: "move",
           payload: { x: newX, y: newY },
         })
       );
-
-      setCurrentPosition({ x: newX, y: newY });
-      setPlayers((prev: any) => {
-        const updated = prev.map((p: Player) => {
-          if (p.id === myId) {
-            return { ...p, x: newX, y: newY };
-          }
-          return p;
-        });
-
-        return [...updated];
+      appDispatch(setCurrentPosition({ x: newX, y: newY }));
+      const payload = players.map((p: Player) => {
+        if (p.id === myId) {
+          return { ...p, x: newX, y: newY };
+        }
+        return p;
       });
+      appDispatch(setPlayers([...payload]));
     };
 
     window.addEventListener("keydown", handleKeyDown);

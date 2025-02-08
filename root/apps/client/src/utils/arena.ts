@@ -1,15 +1,15 @@
-import { Message } from "../components/ChatBox";
-// import useWebRTC from "./voice";
-export interface Player {
-  id: string;
-  x: number; // spawn.x
-  y: number; // spawn.y
-  isMuted: boolean;
-  isDeafened: boolean;
-  isSpeaking: boolean;
-  name: string;
-  connection?: RTCPeerConnection;
-}
+import store, { appDispatch } from "../redux/store";
+import { Message, receive } from "../redux/chatSlice";
+
+import {
+  Player,
+  setCurrentPosition,
+  setError,
+  setSpaceDimensions,
+} from "../redux/gameSlice";
+import { setMyId } from "../redux/authSlice";
+import { getWebSocket } from "./websocket";
+import { addPlayer, setPlayers } from "../redux/playerSlice";
 
 export const getStatusColor = (connectionStatus: any) => {
   switch (connectionStatus) {
@@ -26,8 +26,8 @@ export const getStatusColor = (connectionStatus: any) => {
   }
 };
 
-export const sendMessage = (message: any, wsRef: any) => {
-  wsRef.current?.send(
+export const sendMessage = (message: any) => {
+  getWebSocket()!.send(
     JSON.stringify({
       type: "send-message",
       payload: message,
@@ -35,151 +35,124 @@ export const sendMessage = (message: any, wsRef: any) => {
   );
 };
 
-export const handleServerMessage = (
-  message: any,
-  setCurrentPosition?: any,
-  setSpaceDimensions?: any,
-  setPlayers?: any,
-  setMyId?: any,
-  setMessages?: any,
-  setError?: any
-) => {
+export const handleServerMessage = (message: any) => {
+  const players = store.getState().players.players;
+  message = JSON.parse(message.data);
   switch (message.type) {
     case "space-joined": {
       const { spawn, users, myId } = message.payload;
-      setCurrentPosition(spawn);
-      setSpaceDimensions({
-        width: message.payload.width,
-        height: message.payload.height,
-      });
-      setPlayers([...users]);
-      setMyId(myId);
+      appDispatch(setCurrentPosition(spawn));
+      appDispatch(
+        setSpaceDimensions({
+          width: message.payload.width,
+          height: message.payload.height,
+        })
+      );
+      appDispatch(setPlayers([...users]));
+      appDispatch(setMyId(myId));
       break;
     }
     case "movement": {
       const { userId, x, y } = message.payload;
-      setPlayers((prev: any) => {
-        const updated = prev.map((p: Player) => {
-          if (p.id === userId) {
-            return { ...p, x, y };
-          }
-          return p;
-        });
 
-        return [...updated];
+      const payload = players.map((p: Player) => {
+        if (p.id == userId) {
+          return { ...p, x, y };
+        }
+        return p;
       });
+      appDispatch(setPlayers(payload));
       break;
     }
-    case "movement-rejected":
-      setCurrentPosition(message.payload);
+    case "movement-rejected": {
+      appDispatch(setCurrentPosition(message.payload));
       break;
+    }
+    case "user-joined": {
+      const payload = {
+        id: message.payload.userId,
+        x: message.payload.x,
+        y: message.payload.y,
+        isMuted: false,
+        isDeafened: false,
+        isSpeaking: false,
+        name: message.payload.name,
+      };
 
-    case "user-joined":
-      setPlayers((prev: any) => {
-        const { userId, x, y, name } = message.payload;
-        return [
-          ...prev,
-          {
-            id: userId,
-            x,
-            y,
-            isMuted: false,
-            isDeafened: false,
-            isSpeaking: false,
-            name,
-          },
-        ];
-      });
+      appDispatch(addPlayer(payload));
       break;
-
+    }
     case "user-left": {
-      setPlayers((prev: any) => {
-        const updated = prev.filter(
-          (p: Player) => p.id !== message.payload.userId
-        );
-
-        return [...updated];
-      });
+      const payload = players.filter(
+        (p: Player) => p.id !== message.payload.userId
+      );
+      appDispatch(setPlayers(payload));
       break;
     }
     case "got-message": {
-      const { messageGot, sender, senderName } = message.payload;
+      const { messageGot, senderId, senderName } = message.payload;
       const messageNew: Message = {
-        id: Date.now().toString(),
-        text: messageGot,
-        sender,
-        timestamp: new Date(),
+        message: messageGot,
+        senderId,
+        timestamp: new Date().toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
         senderName,
       };
-      setMessages((prev: any) => [...prev, messageNew]);
+      appDispatch(receive(messageNew));
       break;
     }
     case "already-in-space": {
-      setError("You are already in the space");
+      appDispatch(setError("You are already in the space"));
+      // setError("You are already in the space");
       break;
     }
     case "mute": {
       const { userId, isMuted } = message.payload;
-      setPlayers((prev: any) => {
-        const updated = prev.map((p: Player) => {
-          if (p.id === userId) {
-            return { ...p, isMuted };
-          }
-          return p;
-        });
-
-        return [...updated];
+      const payload = players.map((p: Player) => {
+        if (p.id === userId) {
+          return { ...p, isMuted };
+        }
+        return p;
       });
+      appDispatch(setPlayers(payload));
       break;
     }
+
     case "unmute": {
       const { userId, isMuted } = message.payload;
-      setPlayers((prev: any) => {
-        const updated = prev.map((p: Player) => {
-          if (p.id === userId) {
-            return { ...p, isMuted };
-          }
-          return p;
-        });
-
-        return [...updated];
+      const payload = players.map((p: Player) => {
+        if (p.id === userId) {
+          return { ...p, isMuted };
+        }
+        return p;
       });
+      appDispatch(setPlayers(payload));
       break;
     }
     case "deafen": {
       const { userId, isDeafened } = message.payload;
-      setPlayers((prev: any) => {
-        const updated = prev.map((p: Player) => {
-          if (p.id === userId) {
-            return { ...p, isDeafened };
-          }
-          return p;
-        });
-
-        return [...updated];
+      const payload = players.map((p: Player) => {
+        if (p.id === userId) {
+          return { ...p, isDeafened };
+        }
+        return p;
       });
+      appDispatch(setPlayers(payload));
       break;
     }
     case "undeafen": {
       const { userId, isDeafened } = message.payload;
-      setPlayers((prev: any) => {
-        const updated = prev.map((p: Player) => {
-          if (p.id === userId) {
-            return { ...p, isDeafened };
-          }
-          return p;
-        });
-
-        return [...updated];
+      const payload = players.map((p: Player) => {
+        if (p.id === userId) {
+          return { ...p, isDeafened };
+        }
+        return p;
       });
+      appDispatch(setPlayers(payload));
       break;
     }
-    // case "add-peer": {
-    //   const { userId, createOffer } = message.payload;
-    //   // const { handleNewPeer } = useWebRTC();
-    //   handleNewPeer(userId, createOffer);
-    //   break;
-    // }
   }
 };
 

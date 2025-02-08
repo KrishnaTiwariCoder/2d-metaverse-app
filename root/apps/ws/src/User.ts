@@ -242,9 +242,10 @@ export class User {
               {
                 type: "got-message",
                 payload: {
-                  messageGot: message.text,
-                  sender: message.sender,
+                  messageGot: message.message,
+                  senderId: message.sender,
                   senderName: message.senderName,
+                  timestamp: message.timestamp,
                 },
               },
               this,

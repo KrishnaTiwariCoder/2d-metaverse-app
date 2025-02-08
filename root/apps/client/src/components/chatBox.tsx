@@ -1,35 +1,30 @@
 import { useState } from "react";
 import { Send } from "lucide-react";
 import { sendMessage } from "../utils/arena";
+import { useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
+import { Message, send } from "../redux/chatSlice";
 
-export interface Message {
-  id: string;
-  text: string;
-  sender: string;
-  timestamp: Date;
-  senderName: string;
-}
-
-const ChatBox = ({
-  currentUser,
-  messages,
-  setMessages,
-  participants,
-  wsRef,
-}: any) => {
+const ChatBox = () => {
   const [newMessage, setNewMessage] = useState("");
+  const currentUser = useSelector((state: any) => state.auth.currentUser);
+  const messages = useSelector((state: any) => state.chats.messages);
+  const dispatch = useDispatch();
+  const players = useSelector((state: any) => state.players.players.length);
 
   const handleSendMessage = () => {
     if (newMessage.trim()) {
       const message: Message = {
-        id: Date.now().toString(),
-        text: newMessage,
-        sender: currentUser.id,
-        timestamp: new Date(),
+        message: newMessage,
+        senderId: currentUser.id,
+        timestamp: new Date().toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
         senderName: currentUser.name,
       };
-      setMessages([...messages, message]);
-      sendMessage(message, wsRef);
+      dispatch(send(message));
+      sendMessage(message);
       setNewMessage("");
     }
   };
@@ -38,23 +33,23 @@ const ChatBox = ({
     <div className="flex flex-col h-[600px] w-[400px] bg-slate-900 text-white">
       {/* Chat Header */}
       <div className="p-3 border-b border-slate-700">
-        <p className="text-sm text-slate-400">{participants} participants</p>
+        <p className="text-sm text-slate-400">{players} participants</p>
       </div>
 
       {/* Messages Container */}
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
-        {messages.map((message: Message) => (
+        {messages.map((message: Message, index: number) => (
           <div
-            key={message.id}
+            key={index}
             className={`flex ${
-              message.sender === currentUser.id
+              message.senderId === currentUser.id
                 ? "justify-end"
                 : "justify-start"
             }`}
           >
             <div
               className={`max-w-[70%] rounded-lg p-2 ${
-                message.sender === currentUser.id
+                message.senderId === currentUser.id
                   ? "bg-blue-600"
                   : "bg-slate-800"
               }`}
@@ -62,13 +57,10 @@ const ChatBox = ({
               <div className="flex items-baseline space-x-2 mb-1">
                 <span className="text-sm">{message.senderName}</span>
                 <span className="text-xs text-slate-400">
-                  {message.timestamp.toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
+                  {message.timestamp}
                 </span>
               </div>
-              <p className="text-sm">{message.text}</p>
+              <p className="text-sm">{message.message}</p>
             </div>
           </div>
         ))}

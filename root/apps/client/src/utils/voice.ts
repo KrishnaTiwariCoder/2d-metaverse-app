@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef } from "react";
-import { Player } from "./arena";
-import freeice from "freeice";
+import { Player } from "../redux/gameSlice";
 
 const useWebRTC = ({
   ws,
@@ -63,7 +62,10 @@ const useWebRTC = ({
   const createPeerConnection = useCallback(
     (userId: string) => {
       const connection = new RTCPeerConnection({
-        iceServers: freeice(),
+        iceServers: [
+          { urls: "stun:stun.l.google.com:19302" },
+          { urls: "stun:stun1.l.google.com:19302" },
+        ],
       });
 
       // Handle ICE candidates
@@ -93,9 +95,9 @@ const useWebRTC = ({
       if (localStream.current) {
         localStream.current.getTracks().forEach((track) => {
           connection.addTrack(track, localStream.current!);
-          console.log("--------------------------------------");
-          console.log(track, localStream.current);
-          console.log("--------------------------------------");
+          // console.log("--------------------------------------");
+          // console.log(track, localStream.current);
+          // console.log("--------------------------------------");
         });
       }
       // create a time interval so that until the addTracks is over the function shouold not proceed
@@ -122,16 +124,14 @@ const useWebRTC = ({
       if (createOffer) {
         try {
           const offer = await connection.createOffer();
-          await connection.setLocalDescription(
-            new RTCSessionDescription(offer)
-          );
+          await connection.setLocalDescription(offer);
 
           ws.current?.send(
             JSON.stringify({
               type: "relay-sdp",
               payload: {
                 userId,
-                sdp: connection.localDescription,
+                sdp: offer,
               },
             })
           );
@@ -148,9 +148,7 @@ const useWebRTC = ({
       const player = players.find((p) => p.id === userId);
       if (player?.connection) {
         try {
-          await player.connection.addIceCandidate(
-            new RTCIceCandidate(iceCandidate)
-          );
+          await player.connection.addIceCandidate(iceCandidate);
         } catch (err) {
           console.error("Error adding ICE candidate:", err);
         }

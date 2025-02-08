@@ -1,108 +1,54 @@
-import { useEffect, useRef, useState } from "react";
-import {
-  getStatusColor,
-  handleServerMessage,
-  Player,
-  tokens,
-} from "../utils/arena";
-import VoiceSection from "../components/VoiceSection";
+import { useEffect, useRef } from "react";
+import { getStatusColor, tokens } from "../utils/arena";
 import Canvas from "../components/Canvas";
 import ChatRoom from "../components/ChatBox";
+import { useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
+import { setConnectionStatus, setError, setSpaceId } from "../redux/gameSlice";
+import { storeToken } from "../redux/authSlice";
+import { connectWebSocket, getWebSocket } from "../utils/websocket";
 
 const Arena = () => {
-  const [token, setToken] = useState<string>("");
-  const [spaceId, setSpaceId] = useState<string>("");
-
+  const token = useSelector((state: any) => state.auth.token);
   const canvasRef = useRef<any>(null);
-  const wsRef = useRef<WebSocket | null>(null);
+  const { spaceId, myId, error, connectionStatus } = useSelector(
+    (state: any) => state.game
+  );
+  const { players } = useSelector((state: any) => state.players);
+  const localWsRef = useRef<WebSocket | null>(null);
 
-  const [messages, setMessages] = useState<any[]>([]);
-
-  const [players, setPlayers] = useState<any>([]);
-
-  const [currentPosition, setCurrentPosition] = useState<{
-    x: number;
-    y: number;
-  }>({
-    x: 0,
-    y: 0,
-  });
-
-  const [myId, setMyId] = useState<string>("");
-  const [error, setError] = useState<string>("");
-  const [connectionStatus, setConnectionStatus] =
-    useState<string>("connecting");
-  const [spaceDimensions, setSpaceDimensions] = useState<{
-    width: number;
-    height: number;
-  }>({
-    width: 800,
-    height: 600,
-  });
+  const dispatch = useDispatch();
 
   // Validate required parameters
   useEffect(() => {
     const localToken = localStorage.getItem("token");
     const localSpaceId = localStorage.getItem("spaceId");
     if (!localToken || !localSpaceId) {
-      setError("Missing required parameters: token and spaceId");
+      dispatch(setError("Missing required parameters: token and spaceId"));
       return;
     } else {
-      setToken(localToken);
-      setSpaceId(localSpaceId);
+      dispatch(storeToken({ token: localToken, myId: "", name: "" }));
+      dispatch(setSpaceId(localSpaceId));
     }
 
     if (!token || !spaceId) {
-      setError("Missing required parameters: token and spaceId");
+      dispatch(setError("Missing required parameters: token and spaceId"));
       return;
     }
   }, [token, spaceId]);
   // Setup WebSocket connection
   const setupWebSocket = () => {
     try {
-      wsRef.current = new WebSocket("ws://192.168.0.107:3001");
-      wsRef.current.onopen = async () => {
-        console.log("WebSocket connected");
-        setConnectionStatus("connected");
-        setError("");
+      localWsRef.current = connectWebSocket("ws://192.168.0.107:3001");
 
-        wsRef.current?.send(
-          JSON.stringify({
-            type: "join",
-            payload: {
-              spaceId,
-              token,
-            },
-          })
-        );
-      };
-
-      wsRef.current.onmessage = (event: any) => {
-        const message = JSON.parse(event.data);
-        handleServerMessage(
-          message,
-          setCurrentPosition,
-          setSpaceDimensions,
-          setPlayers,
-          setMyId,
-          setMessages,
-          setError
-        );
-      };
-
-      wsRef.current.onerror = (error: any) => {
-        console.error("WebSocket error:", error);
-        setConnectionStatus("error");
-      };
-
-      wsRef.current.onclose = () => {
-        console.log("WebSocket closed");
-        setConnectionStatus("disconnected");
-      };
+      if (localWsRef.current) {
+        dispatch(setConnectionStatus("connected"));
+        dispatch(setError(""));
+      }
     } catch (err) {
       console.error("WebSocket setup error:", err);
-      setError("Failed to initialize game connection");
-      alert("error: " + err);
+      dispatch(setError("Failed to initialize game connection"));
+      // alert("error: " + err);
     }
   };
 
@@ -111,19 +57,17 @@ const Arena = () => {
     setupWebSocket();
 
     return () => {
-      if (wsRef.current) {
+      if (getWebSocket()) {
         console.log("yes ws closed");
-        wsRef.current.close();
+        getWebSocket()?.close();
       }
     };
   }, [token, spaceId]);
   // Dummy data for testing
   const handleDummyData = () => {
     const used = Math.floor(Math.random() * tokens.length);
-    setToken(tokens[used]);
-    setSpaceId("6787acdaa29ceb6ed47a6f4a");
-    localStorage.setItem("token", tokens[used]);
-    localStorage.setItem("spaceId", "6787acdaa29ceb6ed47a6f4a");
+    dispatch(storeToken({ token: tokens[used], myId: "", name: "" }));
+    dispatch(setSpaceId("6787acdaa29ceb6ed47a6f4a"));
   };
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -152,12 +96,16 @@ const Arena = () => {
           <input
             type="text"
             value={token}
-            onChange={(e) => setToken(e.target.value)}
+            onChange={(e) =>
+              dispatch(
+                storeToken({ token: e.target.value, myId: "", name: "" })
+              )
+            }
           />
           <input
             type="text"
             value={spaceId}
-            onChange={(e) => setSpaceId(e.target.value)}
+            onChange={(e) => dispatch(setSpaceId(e.target.value))}
           />
           <button
             className="bg-blue-500 text-white p-3 rounded-lg"
@@ -172,12 +120,12 @@ const Arena = () => {
 
   return (
     <div className="flex flex-col w-full min-h-screen gap-4 p-4 bg-gray-900">
-      <VoiceSection
+      {/* <VoiceSection
         ws={wsRef}
         players={players}
         myId={myId}
         setPlayers={setPlayers}
-      />
+      /> */}
       <div className="bg-gray-800 rounded-lg border border-gray-700 p-4">
         <div className={`mb-2 ${getStatusColor(connectionStatus)}`}>
           Status: {connectionStatus}
@@ -185,24 +133,9 @@ const Arena = () => {
       </div>
       <div className="flex-1 bg-gray-800 rounded-lg border border-gray-700">
         <div className="flex items-center justify-center w-full h-full min-h-[400px] p-4">
-          <Canvas
-            canvasRef={canvasRef}
-            spaceDimensions={spaceDimensions}
-            connectionStatus={connectionStatus}
-            currentPosition={currentPosition}
-            wsRef={wsRef}
-            setCurrentPosition={setCurrentPosition}
-            setPlayers={setPlayers}
-            myId={myId}
-          />
+          <Canvas canvasRef={canvasRef} />
           <div>
-            <ChatRoom
-              messages={messages}
-              setMessages={setMessages}
-              currentUser={players.find((p: Player) => p.id === myId)}
-              participants={players.length}
-              wsRef={wsRef}
-            />
+            <ChatRoom />
           </div>
         </div>
       </div>
