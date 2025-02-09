@@ -6,7 +6,7 @@ import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
 import { setConnectionStatus, setError, setSpaceId } from "../redux/gameSlice";
 import { storeToken } from "../redux/authSlice";
-import { getWebSocket } from "../utils/websocket";
+import VoiceSection from "../components/VoiceSection";
 
 const Arena = () => {
   const token = useSelector((state: any) => state.auth.token);
@@ -39,7 +39,7 @@ const Arena = () => {
   // Setup WebSocket connection
   const setupWebSocket = () => {
     try {
-      localWsRef.current = new WebSocket("ws://192.168.215.115:3001");
+      localWsRef.current = new WebSocket("ws://localhost:3001");
 
       localWsRef.current.onopen = async () => {
         dispatch(setConnectionStatus("connected"));
@@ -78,9 +78,9 @@ const Arena = () => {
     setupWebSocket();
 
     return () => {
-      if (getWebSocket()) {
+      if (localWsRef.current) {
         console.log("yes ws closed");
-        getWebSocket()?.close();
+        localWsRef.current.close();
       }
     };
   }, [token, spaceId]);
@@ -142,12 +142,8 @@ const Arena = () => {
 
   return (
     <div className="flex flex-col w-full min-h-screen gap-4 p-4 bg-gray-900">
-      {/* <VoiceSection
-        ws={wsRef}
-        players={players}
-        myId={myId}
-        setPlayers={setPlayers}
-      /> */}
+      {}
+      <VoiceSection ws={localWsRef} />
       <div className="bg-gray-800 rounded-lg border border-gray-700 p-4">
         <div className={`mb-2 ${getStatusColor(connectionStatus)}`}>
           Status: {connectionStatus}
@@ -157,7 +153,7 @@ const Arena = () => {
         <div className="flex items-center justify-center w-full h-full min-h-[400px] p-4">
           <Canvas canvasRef={canvasRef} wsRef={localWsRef} />
           <div>
-            <ChatRoom />
+            <ChatRoom wsRef={localWsRef} />
           </div>
         </div>
       </div>

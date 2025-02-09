@@ -1,12 +1,15 @@
-import WebSocket, { WebSocketServer } from "ws";
+import { WebSocketServer } from "ws";
 import { connectDB } from "@repo/database";
 import { User } from "./User";
-import https from "https";
+import express from "express";
+import { createServer } from "http";
 
-// const server = https.createServer();
+const app = express();
+const server = createServer(app);
 
-const wss = new WebSocketServer({ port: 3001 });
-// connectDB();
+const wss = new WebSocketServer({ server });
+
+connectDB();
 
 wss.on("connection", function connection(ws) {
   console.log("user connected");
@@ -19,4 +22,4 @@ wss.on("connection", function connection(ws) {
   });
 });
 
-// server.listen(3001);
+server.listen(3001);

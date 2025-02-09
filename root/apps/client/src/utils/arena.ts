@@ -7,7 +7,7 @@ import {
   setError,
   setSpaceDimensions,
 } from "../redux/gameSlice";
-import { setMyId } from "../redux/authSlice";
+import { setCurrentUser, setMyId } from "../redux/authSlice";
 import { addPlayer, setPlayer, setPlayers } from "../redux/playerSlice";
 
 export const getStatusColor = (connectionStatus: any) => {
@@ -49,6 +49,12 @@ export const handleServerMessage = (message: any) => {
       );
       appDispatch(setPlayers([...users]));
       appDispatch(setMyId(myId));
+      appDispatch(
+        setCurrentUser({
+          id: myId,
+          name: message.payload.users.find((u: any) => u.id == myId).name,
+        })
+      );
       localStorage.setItem("myId", myId);
       break;
     }

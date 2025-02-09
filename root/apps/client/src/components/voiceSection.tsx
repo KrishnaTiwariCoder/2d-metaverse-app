@@ -1,93 +1,48 @@
-import { useRef } from "react";
-// import VoiceBox from "./VoiceBox";
-import useWebRTC from "../utils/voice";
+import React, { useEffect } from "react";
 import { Player } from "../redux/playerSlice";
+import { useSelector } from "react-redux";
+import useWebRTC from "../utils/voice";
 
 interface VoiceSectionProps {
-  ws: any;
-  players: any;
-  myId: string;
-  setPlayers: any;
+  ws: React.RefObject<WebSocket>;
 }
 
-const VoiceSection = ({ ws, players, setPlayers, myId }: VoiceSectionProps) => {
-  const audioRefs = useRef<any>({});
+const VoiceSection = ({ ws }: VoiceSectionProps) => {
+  const players = useSelector((state: any) => state.players.players);
+  const myId = useSelector((state: any) => state.auth.myId);
 
-  const provideRef = (instance: any, userId: string) => {
+  const { startCapture, toggleMute, audioRefs } = useWebRTC({ wsRef: ws });
+
+  const getInstance = (instance: any, userId: string) => {
+    // dispatch(addAudioRef({ userId, audioRef: instance }));
     audioRefs.current[userId] = instance;
   };
-  useWebRTC({
-    ws,
-    players,
-    myId,
-    audioRefs,
-    setPlayers,
+
+  useEffect(() => {
+    startCapture();
   });
-
-  // const me = players.find((p: Player) => p.id === myId);
-
-  // const onMuteToggle = () => {
-  //   ws.current?.send(
-  //     JSON.stringify({
-  //       type: me.isMuted ? "unmute" : "mute",
-  //       payload: {
-  //         userId: myId,
-  //         isMuted: !me.isMuted,
-  //       },
-  //     })
-  //   );
-  //   setPlayers((prev: any) => {
-  //     const updated = prev.map((p: Player) => {
-  //       if (p.id === myId) {
-  //         return { ...p, isMuted: !p.isMuted };
-  //       }
-  //       return p;
-  //     });
-
-  //     return [...updated];
-  //   });
-  // };
-  // const onDeafenToggle = () => {
-  //   ws.current?.send(
-  //     JSON.stringify({
-  //       type: me.isDeafened ? "undeafen" : "deafen",
-  //       payload: {
-  //         userId: myId,
-  //         isDeafened: !me.isDeafened,
-  //       },
-  //     })
-  //   );
-  //   // logic to update the state of the player
-  //   setPlayers((prev: any) => {
-  //     const updated = prev.map((p: Player) => {
-  //       if (p.id === myId) {
-  //         return { ...p, isDeafened: !p.isDeafened };
-  //       }
-  //       return p;
-  //     });
-
-  //     return [...updated];
-  //   });
-  // };
 
   return (
     <div className="grid grid-cols-4 gap-2">
       <div className="">
-        {players.map((player: Player, index: number) => {
-          return (
-            <div
-              key={index}
-              className="bg-gray-800 rounded-lg border border-gray-700 p-4 w-screen "
-            >
-              {player.name}
-              <audio
-                autoPlay
-                ref={(instance) => provideRef(instance, player.id)}
-                controls
-              ></audio>
-            </div>
-          );
-        })}
+        {players
+          .filter((p: Player) => p.id !== myId)
+          .map((player: Player, index: number) => {
+            return (
+              <div
+                key={index}
+                className="bg-gray-800 rounded-lg border border-gray-700 p-4 w-screen "
+              >
+                {player.name}
+                <audio
+                  autoPlay
+                  ref={(instance) => getInstance(instance, player.id)}
+                  controls
+                ></audio>
+                <button onClick={toggleMute}>Mute</button>
+              </div>
+            );
+          })}
       </div>
       {/* {me && (
         <VoiceBox

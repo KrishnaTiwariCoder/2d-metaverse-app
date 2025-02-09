@@ -335,7 +335,7 @@ export class User {
               ?.find((user: User) => user.userId === userId)
               ?.ws.send(
                 JSON.stringify({
-                  type: "ice-candidate",
+                  type: "ice",
                   payload: {
                     icecandidate,
                     userId: this.userId,

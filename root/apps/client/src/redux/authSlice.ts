@@ -42,11 +42,15 @@ const authSlice = createSlice({
     setMyId: (state, action) => {
       state.myId = action.payload;
     },
+    setCurrentUser: (state, action) => {
+      state.currentUser = action.payload;
+    },
   },
 });
 
 // Export actions
-export const { storeToken, removeToken, setMyId } = authSlice.actions;
+export const { storeToken, removeToken, setMyId, setCurrentUser } =
+  authSlice.actions;
 
 // Export reducer
 export default authSlice.reducer;

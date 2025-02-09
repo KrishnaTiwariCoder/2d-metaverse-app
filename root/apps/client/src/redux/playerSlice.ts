@@ -33,7 +33,6 @@ const playerSlice = createSlice({
       );
     },
     setPlayers: (state, action) => {
-      console.log(action.payload);
       state.players = action.payload;
     },
     setPlayer: (state, action) => {
