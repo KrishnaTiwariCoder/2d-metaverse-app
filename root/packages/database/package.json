@@ -17,5 +17,8 @@
     "@types/node": "^22.10.5",
     "mongoose": "^8.9.3",
     "typescript": "^5.7.3"
+  },
+  "exports": {
+    ".": "./dist/index.js"
   }
 }
