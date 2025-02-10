@@ -5,7 +5,8 @@
   "types": "dist/index.d.ts",
   "type": "commonjs",
   "scripts": {
-    "build": "tsc -b"
+    "build": "tsc -b",
+    "prepare": "npm run build"
   },
   "keywords": [],
   "author": "",
