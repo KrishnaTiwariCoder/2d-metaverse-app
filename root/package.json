@@ -1,5 +1,5 @@
 {
-  "name": "root",
+  "name": "repo",
   "private": true,
   "scripts": {
     "build": "turbo build",
