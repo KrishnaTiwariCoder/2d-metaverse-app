@@ -176,7 +176,12 @@ const useWebRTC = ({ wsRef }: any) => {
         const { userId, sdp } = parsedMessage.payload;
         let connection = connections.current[userId];
         if (!connection) {
-          connection = createPeerConnection(userId, false);
+          const newConnection = createPeerConnection(userId, false);
+          if (newConnection) {
+            connection = newConnection;
+          } else {
+            return;
+          }
         }
         if (connection) {
           await handleRemoteSDP(sdp, connection, userId);
