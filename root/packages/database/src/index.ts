@@ -3,7 +3,7 @@ import { MONGO_URL } from "./config";
 
 const connectDB = () => {
   return mongoose
-    .connect(MONGO_URL)
+    .connect(process.env.MONGO_URL || MONGO_URL)
     .then(() => {
       console.log("Database connected successfully");
     })

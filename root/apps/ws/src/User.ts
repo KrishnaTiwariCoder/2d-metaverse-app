@@ -42,7 +42,7 @@ export class User {
             const { spaceId, token } = parsedData.payload;
             const { _id: userId, username: name } = jwt.verify(
               token,
-              JWT_SECRET
+              process.env.JWT_SECRET || JWT_SECRET
             ) as JwtPayload;
             if (!userId) {
               this.ws.close();
