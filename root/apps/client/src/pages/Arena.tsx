@@ -1,16 +1,16 @@
 import { useEffect, useRef } from "react";
-import { getStatusColor, handleServerMessage, tokens } from "../utils/arena.ts";
-import Canvas from "../components/Canvas.tsx";
-import ChatRoom from "../components/ChatBox.tsx";
+import { getStatusColor, handleServerMessage, tokens } from "../utils/arena";
+import Canvas from "../components/canvas";
+import ChatRoom from "../components/chatbox";
 import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
 import {
   setConnectionStatus,
   setError,
   setSpaceId,
-} from "../redux/gameSlice.ts";
-import { storeToken } from "../redux/authSlice.ts";
-import VoiceSection from "../components/VoiceSection.tsx";
+} from "../redux/gameslice.js";
+import { storeToken } from "../redux/authslice.js";
+import VoiceSection from "../components/voicesection";
 
 const Arena = () => {
   const token = useSelector((state: any) => state.auth.token);

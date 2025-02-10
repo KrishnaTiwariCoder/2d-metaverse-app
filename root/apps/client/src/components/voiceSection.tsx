@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
-import { Player } from "../redux/playerSlice.ts";
+import { Player } from "../redux/playerslice.js";
 import { useSelector } from "react-redux";
-import useWebRTC from "../utils/voice.ts";
+import useWebRTC from "../utils/voice";
 
 interface VoiceSectionProps {
   ws: React.RefObject<WebSocket>;

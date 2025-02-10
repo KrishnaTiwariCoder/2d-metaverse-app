@@ -1,5 +1,5 @@
 import "./App.css";
-import Arena from "./pages/Arena.tsx";
+import Arena from "./pages/Arena";
 
 function App() {
   return (
