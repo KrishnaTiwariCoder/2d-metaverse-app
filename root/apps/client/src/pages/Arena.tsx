@@ -10,7 +10,7 @@ import {
   setSpaceId,
 } from "../redux/gameSlice.ts";
 import { storeToken } from "../redux/authSlice.ts";
-import VoiceSection from "../components/VoiceSection.ts";
+import VoiceSection from "../components/VoiceSection.tsx";
 
 const Arena = () => {
   const token = useSelector((state: any) => state.auth.token);
