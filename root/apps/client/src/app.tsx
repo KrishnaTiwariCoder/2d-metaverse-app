@@ -1,4 +1,4 @@
-import "./App.css";
+import "./app.css";
 import Arena from "./pages/arena";
 
 function App() {
