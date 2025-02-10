@@ -4,12 +4,8 @@ import Canvas from "../components/canvas";
 import ChatRoom from "../components/chatbox";
 import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
-import {
-  setConnectionStatus,
-  setError,
-  setSpaceId,
-} from "../redux/gameslice.js";
-import { storeToken } from "../redux/authslice.js";
+import { setConnectionStatus, setError, setSpaceId } from "../redux/gameslice";
+import { storeToken } from "../redux/authslice";
 import VoiceSection from "../components/voicesection";
 
 const Arena = () => {

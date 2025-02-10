@@ -1,8 +1,8 @@
 import { configureStore } from "@reduxjs/toolkit";
-import chatReducer from "./chatslice.js"; // Import your slice reducer
-import authReducer from "./authslice.js";
-import gameReducer from "./gameslice.js";
-import playerReducer from "./playerslice.js";
+import chatReducer from "./chatslice"; // Import your slice reducer
+import authReducer from "./authslice";
+import gameReducer from "./gameslice";
+import playerReducer from "./playerslice";
 
 // Create and export the store
 export const store = configureStore({

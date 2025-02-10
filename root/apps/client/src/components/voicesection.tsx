@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Player } from "../redux/playerslice.js";
+import { Player } from "../redux/playerslice";
 import { useSelector } from "react-redux";
 import useWebRTC from "../utils/voice";
 
