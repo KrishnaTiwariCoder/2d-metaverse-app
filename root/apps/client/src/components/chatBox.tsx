@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { Send } from "lucide-react";
-import { sendMessage } from "../utils/arena";
+import { sendMessage } from "../utils/arena.ts";
 import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
-import { Message, send } from "../redux/chatSlice";
+import { Message, send } from "../redux/chatSlice.ts";
 
 const ChatBox = ({ wsRef }: any) => {
   const [newMessage, setNewMessage] = useState("");

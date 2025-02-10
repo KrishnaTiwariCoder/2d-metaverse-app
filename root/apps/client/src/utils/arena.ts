@@ -1,14 +1,14 @@
-import store, { appDispatch } from "../redux/store";
-import { Message, receive } from "../redux/chatSlice";
+import store, { appDispatch } from "../redux/store.ts";
+import { Message, receive } from "../redux/chatSlice.ts";
 
 import {
   Player,
   setCurrentPosition,
   setError,
   setSpaceDimensions,
-} from "../redux/gameSlice";
-import { setCurrentUser, setMyId } from "../redux/authSlice";
-import { addPlayer, setPlayer, setPlayers } from "../redux/playerSlice";
+} from "../redux/gameSlice.ts";
+import { setCurrentUser, setMyId } from "../redux/authSlice.ts";
+import { addPlayer, setPlayer, setPlayers } from "../redux/playerSlice.ts";
 
 export const getStatusColor = (connectionStatus: any) => {
   switch (connectionStatus) {

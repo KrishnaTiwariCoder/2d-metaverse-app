@@ -1,8 +1,8 @@
 import { useEffect } from "react";
 import { useSelector } from "react-redux";
-import { appDispatch } from "../redux/store";
-import { setCurrentPosition } from "../redux/gameSlice";
-import { Player, setPlayer } from "../redux/playerSlice";
+import { appDispatch } from "../redux/store.ts";
+import { setCurrentPosition } from "../redux/gameSlice.ts";
+import { Player, setPlayer } from "../redux/playerSlice.ts";
 
 const Canvas = ({ canvasRef, wsRef }: any) => {
   const { spaceDimensions, connectionStatus, currentPosition } = useSelector(
