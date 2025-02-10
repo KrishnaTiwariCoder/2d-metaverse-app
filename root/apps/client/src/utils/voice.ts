@@ -5,6 +5,8 @@ const useWebRTC = ({ wsRef }: any) => {
   const localStream = useRef<MediaStream | null>(null);
   const connections = useRef<{ [userId: string]: RTCPeerConnection }>({});
   const audioRefs = useRef<{ [userId: string]: HTMLAudioElement }>({});
+  const videoRefs = useRef<{ [userId: string]: HTMLVideoElement }>({});
+  const localVideoRef = useRef<HTMLVideoElement | null>(null);
   const myId = useSelector((state: any) => state.auth.myId);
 
   const createOfferFunction = async (
@@ -12,7 +14,7 @@ const useWebRTC = ({ wsRef }: any) => {
     targetPeerId: string
   ) => {
     try {
-      const rs = await new Promise((r) => {
+      const rs: MediaStream = await new Promise((r) => {
         const timer = setInterval(() => {
           if (localStream.current) {
             clearInterval(timer);
@@ -21,15 +23,13 @@ const useWebRTC = ({ wsRef }: any) => {
         }, 300);
       });
       if (rs) {
-        console.log(rs.getTracks()[0], "tracks");
-        peerConnection.addTrack(rs.getTracks()[0]);
+        rs.getTracks().forEach((track) => {
+          peerConnection.addTrack(track, rs);
+        });
       }
-      // peerConnection.addTrack(localStream.current!.getTracks()[0]);
-      const offer = await peerConnection.createOffer();
-      console.log(offer, "offer created");
-      await peerConnection.setLocalDescription(offer);
 
-      // console.log("6");
+      const offer = await peerConnection.createOffer();
+      await peerConnection.setLocalDescription(offer);
 
       wsRef.current?.send(
         JSON.stringify({
@@ -46,9 +46,7 @@ const useWebRTC = ({ wsRef }: any) => {
   };
 
   const createPeerConnection = (targetPeerId: string, createOffer: boolean) => {
-    // Prevent duplicate peer connections
-    if (connections.current[targetPeerId])
-      return connections.current[targetPeerId];
+    if (connections.current[targetPeerId]) return;
 
     const peerConnection = new RTCPeerConnection({
       iceServers: [
@@ -57,33 +55,10 @@ const useWebRTC = ({ wsRef }: any) => {
       ],
     });
 
-    // Add local stream tracks to the connection
-    if (localStream.current) {
-      // console.log("5");
-      localStream.current.getTracks().forEach((track) => {
-        peerConnection.addTrack(track, localStream.current!);
-        // console.log("adding tracks", track, localStream.current!, track.kind);
-      });
-    } else {
-      new Promise((resolve) => {
-        if (localStream.current) {
-          resolve(localStream.current);
-        }
-      }).then((stream: any) => {
-        // console.log("6");
-        stream.getTracks().forEach((track: any) => {
-          peerConnection.addTrack(track, localStream.current!);
-          // console.log("adding tracks", track, localStream.current!, track.kind);
-        });
-      });
-    }
-    // console.log("4");
-
-    // Handle ICE candidates - send only once
     const iceCandidatesSent = new Set<string>();
     peerConnection.onicecandidate = (event) => {
       if (event.candidate) {
-        const candidateKey = JSON.stringify(event.candidate);
+        const candidateKey = `${event.candidate.candidate}-${event.candidate.sdpMid}`;
         if (!iceCandidatesSent.has(candidateKey)) {
           wsRef.current?.send(
             JSON.stringify({
@@ -99,29 +74,25 @@ const useWebRTC = ({ wsRef }: any) => {
       }
     };
 
-    // Handle incoming tracks
-
     peerConnection.ontrack = (event) => {
       const audioRef = audioRefs.current[targetPeerId];
-      if (!audioRefs.current[targetPeerId]) {
-        console.warn("No audio element found for", targetPeerId);
-        return;
-      }
-      audioRef.srcObject = event.streams[0];
-      console.log("--------------------------------");
-      console.log("streams came", event.streams[0]);
+      const videoRef = videoRefs.current[targetPeerId];
 
-      console.log("local audioelement to be set", audioRef, targetPeerId);
-      console.log("all the local audio elements", audioRefs.current);
-      console.log("----------------------------------");
-      // if (audioRef) {
-      //   audioRef.srcObject = event.streams[0];
-      // }
+      if (event.streams && event.streams[0]) {
+        const stream = event.streams[0];
+
+        // Handle audio track
+        if (audioRef && event.track.kind === "audio") {
+          audioRef.srcObject = stream;
+        }
+
+        // Handle video track
+        if (videoRef && event.track.kind === "video") {
+          videoRef.srcObject = stream;
+        }
+      }
     };
 
-    // Create and store the new peer
-
-    // Create offer if required
     if (createOffer) {
       createOfferFunction(peerConnection, targetPeerId);
     }
@@ -135,96 +106,144 @@ const useWebRTC = ({ wsRef }: any) => {
     if (peerConnection) {
       peerConnection.close();
       delete connections.current[targetPeerId];
+
+      // Clean up media elements
+      if (audioRefs.current[targetPeerId]) {
+        const audioEl = audioRefs.current[targetPeerId];
+        audioEl.srcObject = null;
+        delete audioRefs.current[targetPeerId];
+      }
+
+      if (videoRefs.current[targetPeerId]) {
+        const videoEl = videoRefs.current[targetPeerId];
+        videoEl.srcObject = null;
+        delete videoRefs.current[targetPeerId];
+      }
+    }
+  };
+
+  const handleRemoteSDP = async (
+    sdp: RTCSessionDescriptionInit,
+    peerConnection: RTCPeerConnection,
+    userId: string
+  ) => {
+    try {
+      if (sdp.type === "offer") {
+        await peerConnection.setRemoteDescription(
+          new RTCSessionDescription(sdp)
+        );
+
+        if (localStream.current) {
+          localStream.current.getTracks().forEach((track) => {
+            peerConnection.addTrack(track, localStream.current!);
+          });
+        }
+
+        const answer = await peerConnection.createAnswer();
+        await peerConnection.setLocalDescription(answer);
+
+        wsRef.current?.send(
+          JSON.stringify({
+            type: "relay-sdp",
+            payload: { userId, sdp: answer },
+          })
+        );
+      } else if (sdp.type === "answer") {
+        await peerConnection.setRemoteDescription(
+          new RTCSessionDescription(sdp)
+        );
+      }
+    } catch (error) {
+      console.error("Error in handleRemoteSDP:", error);
     }
   };
 
   const handleServerMessage = async (message: any) => {
-    message = JSON.parse(message.data);
-    switch (message.type) {
+    const parsedMessage = JSON.parse(message.data);
+    switch (parsedMessage.type) {
       case "add-peer": {
-        // console.log("3");
-        const { userId, createOffer } = message.payload;
-        if (userId === myId) break;
-        if (connections.current[userId]) break;
+        const { userId, createOffer } = parsedMessage.payload;
+        if (userId === myId) return;
         createPeerConnection(userId, createOffer);
         break;
       }
       case "remove-peer": {
-        const { userId } = message.payload;
+        const { userId } = parsedMessage.payload;
         removePeerConnection(userId);
         break;
       }
+      case "sdp": {
+        const { userId, sdp } = parsedMessage.payload;
+        let connection = connections.current[userId];
+        if (!connection) {
+          connection = createPeerConnection(userId, false);
+        }
+        if (connection) {
+          await handleRemoteSDP(sdp, connection, userId);
+        }
+        break;
+      }
       case "ice": {
-        const { userId, icecandidate } = message.payload;
+        const { userId, ice } = parsedMessage.payload;
         if (userId === myId) return;
-        // console.log(8, userId, icecandidate);
         const connection = connections.current[userId];
-        if (connection && icecandidate) {
+        if (connection && ice) {
           try {
-            await connection.addIceCandidate(icecandidate);
+            await connection.addIceCandidate(ice);
           } catch (error) {
             console.error("Error adding ICE candidate:", error);
           }
         }
         break;
       }
-      case "sdp": {
-        const { userId, sdp } = message.payload;
-        // console.log(7, userId, sdp);
-        if (userId === myId) return;
-        const connection = connections.current[userId];
-        if (connection) {
-          try {
-            await connection.setRemoteDescription(sdp);
-            if (sdp.type === "offer") {
-              const answer = await connection.createAnswer();
-
-              await connection.setLocalDescription(answer);
-
-              wsRef.current?.send(
-                JSON.stringify({
-                  type: "relay-sdp",
-                  payload: {
-                    userId,
-                    sdp: answer,
-                  },
-                })
-              );
-            }
-          } catch (error) {
-            console.error("Error handling remote SDP:", error);
-          }
-        }
-        break;
-      }
-      default:
-        console.warn(`Unknown message type: ${message.type}`);
-        break;
     }
   };
 
   const startCapture = async () => {
     try {
-      wsRef.current?.addEventListener("message", handleServerMessage);
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: true,
-        video: false,
+        video: true, // Now requesting video as well
       });
+
       localStream.current = stream;
-      // console.log("tracks ", stream.getTracks());
-      // console.log("1");
+
+      // Display local video
+      if (localVideoRef.current) {
+        localVideoRef.current.srcObject = stream;
+      }
     } catch (err) {
       console.error("Error accessing local media stream:", err);
     }
   };
 
-  const toggleMute = () => {};
+  const toggleMute = (type: "audio" | "video") => {
+    if (localStream.current) {
+      if (type === "audio") {
+        const audioTrack = localStream.current.getAudioTracks()[0];
+        if (audioTrack) {
+          audioTrack.enabled = !audioTrack.enabled;
+        }
+      } else {
+        const videoTrack = localStream.current.getVideoTracks()[0];
+        if (videoTrack) {
+          videoTrack.enabled = !videoTrack.enabled;
+        }
+      }
+    }
+  };
 
   useEffect(() => {
-    // console.log("2");
     wsRef.current?.addEventListener("message", handleServerMessage);
     return () => {
       wsRef.current?.removeEventListener("message", handleServerMessage);
+      // Cleanup streams and connections
+      if (localStream.current) {
+        localStream.current.getTracks().forEach((track) => track.stop());
+      }
+      Object.keys(connections.current).forEach((userId) => {
+        removePeerConnection(userId);
+      });
     };
   }, []);
 
@@ -232,6 +251,8 @@ const useWebRTC = ({ wsRef }: any) => {
     startCapture,
     toggleMute,
     audioRefs,
+    videoRefs,
+    localVideoRef,
   };
 };
 

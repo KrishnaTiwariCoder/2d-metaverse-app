@@ -11,12 +11,8 @@ const VoiceSection = ({ ws }: VoiceSectionProps) => {
   const players = useSelector((state: any) => state.players.players);
   const myId = useSelector((state: any) => state.auth.myId);
 
-  const { startCapture, toggleMute, audioRefs } = useWebRTC({ wsRef: ws });
-
-  const getInstance = (instance: any, userId: string) => {
-    // dispatch(addAudioRef({ userId, audioRef: instance }));
-    audioRefs.current[userId] = instance;
-  };
+  const { startCapture, toggleMute, audioRefs, videoRefs, localVideoRef } =
+    useWebRTC({ wsRef: ws });
 
   useEffect(() => {
     startCapture();
@@ -25,24 +21,22 @@ const VoiceSection = ({ ws }: VoiceSectionProps) => {
   return (
     <div className="grid grid-cols-4 gap-2">
       <div className="">
-        {players
-          .filter((p: Player) => p.id !== myId)
-          .map((player: Player, index: number) => {
-            return (
-              <div
-                key={index}
-                className="bg-gray-800 rounded-lg border border-gray-700 p-4 w-screen "
-              >
-                {player.name}
-                <audio
-                  autoPlay
-                  ref={(instance) => getInstance(instance, player.id)}
-                  controls
-                ></audio>
-                <button onClick={toggleMute}>Mute</button>
-              </div>
-            );
-          })}
+        <video
+          ref={(el) => (localVideoRef.current = el)}
+          autoPlay
+          muted
+          playsInline
+        />
+        {players.map((player: Player) => (
+          <div key={player.id}>
+            <video
+              ref={(el) => (videoRefs.current[player.id] = el)}
+              autoPlay
+              playsInline
+            />
+            <audio ref={(el) => (audioRefs.current[player.id] = el)} autoPlay />
+          </div>
+        ))}
       </div>
       {/* {me && (
         <VoiceBox

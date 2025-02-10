@@ -33,9 +33,10 @@ export class User {
     try {
       this.ws.on("message", async (data) => {
         const parsedData = JSON.parse(data.toString());
-        console.log(parsedData);
         console.log("------------------------------------------------");
-        // return;
+        console.log(parsedData, "parsed data");
+        console.log("------------------------------------------------");
+
         switch (parsedData.type) {
           case "join": {
             const { spaceId, token } = parsedData.payload;
@@ -320,12 +321,10 @@ export class User {
             break;
           }
           case "relay-ice": {
-            // console.log("hit the relay ice here are the detais");
-            // console.log("------------------------------------------------");
-            // console.log(parsedData.payload);
-            const { userId, icecandidate } = parsedData.payload;
+            const { userId, ice }: { ice: RTCIceCandidate; userId: string } =
+              parsedData.payload;
 
-            if (!userId || !icecandidate) {
+            if (!userId || !ice) {
               console.error("Invalid ICE candidate relay");
               return;
             }
@@ -337,7 +336,7 @@ export class User {
                 JSON.stringify({
                   type: "ice",
                   payload: {
-                    icecandidate,
+                    ice,
                     userId: this.userId,
                   },
                 })
@@ -354,7 +353,7 @@ export class User {
                 JSON.stringify({
                   type: "sdp",
                   payload: {
-                    sdp: sdp,
+                    sdp,
                     userId: this.userId,
                   },
                 })
