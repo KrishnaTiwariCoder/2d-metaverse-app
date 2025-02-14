@@ -33,9 +33,9 @@ export class User {
     try {
       this.ws.on("message", async (data) => {
         const parsedData = JSON.parse(data.toString());
-        console.log("------------------------------------------------");
-        console.log(parsedData, "parsed data");
-        console.log("------------------------------------------------");
+        // console.log("------------------------------------------------");
+        // console.log(parsedData, "parsed data");
+        // console.log("------------------------------------------------");
 
         switch (parsedData.type) {
           case "join": {
@@ -168,7 +168,7 @@ export class User {
             const xDisplacement = Math.abs(MoveX - this.x);
             const yDisplacement = Math.abs(MoveY - this.y);
             if (MoveX < 0 || MoveY < 0) {
-              console.log("rejected cause of negative displacement");
+              // console.log("rejected cause of negative displacement");
               this.send({
                 type: "movement-rejected",
                 payload: {
@@ -184,7 +184,7 @@ export class User {
             ) {
               //reject movement if the x and y are more than the width and height of the space
               if (MoveX > this.spaceWidth! || MoveY > this.spaceHeight!) {
-                console.log("rejected cause of space width and height");
+                // console.log("rejected cause of space width and height");
                 this.send({
                   type: "movement-rejected",
                   payload: {
@@ -204,7 +204,7 @@ export class User {
                     u.userId !== this.userId
                 );
               if (otherUser) {
-                console.log("rejected cause of other user");
+                // console.log("rejected cause of other user");
                 this.send({
                   type: "movement-rejected",
                   payload: {
@@ -230,7 +230,7 @@ export class User {
               );
               return;
             } else {
-              console.log("rejected cause of displacement");
+              // console.log("rejected cause of displacement");
               this.send({
                 type: "movement-rejected",
                 payload: {
@@ -363,7 +363,7 @@ export class User {
         }
       });
     } catch (error) {
-      console.log(error);
+      // console.log(error);
       this.ws.close();
     }
   }

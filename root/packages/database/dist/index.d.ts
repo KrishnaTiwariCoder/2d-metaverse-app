@@ -114,12 +114,22 @@ declare const map: mongoose.Model<{
     width: number;
     height: number;
     thumbnail: string;
-    elements: {
+    elements: mongoose.Types.DocumentArray<{
         id?: mongoose.Types.ObjectId | null | undefined;
         statics?: boolean | null | undefined;
         x?: number | null | undefined;
         y?: number | null | undefined;
-    }[];
+    }, mongoose.Types.Subdocument<mongoose.Types.ObjectId, any, {
+        id?: mongoose.Types.ObjectId | null | undefined;
+        statics?: boolean | null | undefined;
+        x?: number | null | undefined;
+        y?: number | null | undefined;
+    }> & {
+        id?: mongoose.Types.ObjectId | null | undefined;
+        statics?: boolean | null | undefined;
+        x?: number | null | undefined;
+        y?: number | null | undefined;
+    }>;
     createdBy: mongoose.Types.ObjectId;
 }, {}, {}, {}, mongoose.Document<unknown, {}, {
     createdAt: NativeDate;
@@ -129,12 +139,22 @@ declare const map: mongoose.Model<{
     width: number;
     height: number;
     thumbnail: string;
-    elements: {
+    elements: mongoose.Types.DocumentArray<{
         id?: mongoose.Types.ObjectId | null | undefined;
         statics?: boolean | null | undefined;
         x?: number | null | undefined;
         y?: number | null | undefined;
-    }[];
+    }, mongoose.Types.Subdocument<mongoose.Types.ObjectId, any, {
+        id?: mongoose.Types.ObjectId | null | undefined;
+        statics?: boolean | null | undefined;
+        x?: number | null | undefined;
+        y?: number | null | undefined;
+    }> & {
+        id?: mongoose.Types.ObjectId | null | undefined;
+        statics?: boolean | null | undefined;
+        x?: number | null | undefined;
+        y?: number | null | undefined;
+    }>;
     createdBy: mongoose.Types.ObjectId;
 }> & {
     createdAt: NativeDate;
@@ -144,12 +164,22 @@ declare const map: mongoose.Model<{
     width: number;
     height: number;
     thumbnail: string;
-    elements: {
+    elements: mongoose.Types.DocumentArray<{
         id?: mongoose.Types.ObjectId | null | undefined;
         statics?: boolean | null | undefined;
         x?: number | null | undefined;
         y?: number | null | undefined;
-    }[];
+    }, mongoose.Types.Subdocument<mongoose.Types.ObjectId, any, {
+        id?: mongoose.Types.ObjectId | null | undefined;
+        statics?: boolean | null | undefined;
+        x?: number | null | undefined;
+        y?: number | null | undefined;
+    }> & {
+        id?: mongoose.Types.ObjectId | null | undefined;
+        statics?: boolean | null | undefined;
+        x?: number | null | undefined;
+        y?: number | null | undefined;
+    }>;
     createdBy: mongoose.Types.ObjectId;
 } & {
     _id: mongoose.Types.ObjectId;
@@ -165,12 +195,22 @@ declare const map: mongoose.Model<{
     width: number;
     height: number;
     thumbnail: string;
-    elements: {
+    elements: mongoose.Types.DocumentArray<{
         id?: mongoose.Types.ObjectId | null | undefined;
         statics?: boolean | null | undefined;
         x?: number | null | undefined;
         y?: number | null | undefined;
-    }[];
+    }, mongoose.Types.Subdocument<mongoose.Types.ObjectId, any, {
+        id?: mongoose.Types.ObjectId | null | undefined;
+        statics?: boolean | null | undefined;
+        x?: number | null | undefined;
+        y?: number | null | undefined;
+    }> & {
+        id?: mongoose.Types.ObjectId | null | undefined;
+        statics?: boolean | null | undefined;
+        x?: number | null | undefined;
+        y?: number | null | undefined;
+    }>;
     createdBy: mongoose.Types.ObjectId;
 }, mongoose.Document<unknown, {}, mongoose.FlatRecord<{
     createdAt: NativeDate;
@@ -180,12 +220,22 @@ declare const map: mongoose.Model<{
     width: number;
     height: number;
     thumbnail: string;
-    elements: {
+    elements: mongoose.Types.DocumentArray<{
         id?: mongoose.Types.ObjectId | null | undefined;
         statics?: boolean | null | undefined;
         x?: number | null | undefined;
         y?: number | null | undefined;
-    }[];
+    }, mongoose.Types.Subdocument<mongoose.Types.ObjectId, any, {
+        id?: mongoose.Types.ObjectId | null | undefined;
+        statics?: boolean | null | undefined;
+        x?: number | null | undefined;
+        y?: number | null | undefined;
+    }> & {
+        id?: mongoose.Types.ObjectId | null | undefined;
+        statics?: boolean | null | undefined;
+        x?: number | null | undefined;
+        y?: number | null | undefined;
+    }>;
     createdBy: mongoose.Types.ObjectId;
 }>> & mongoose.FlatRecord<{
     createdAt: NativeDate;
@@ -195,12 +245,22 @@ declare const map: mongoose.Model<{
     width: number;
     height: number;
     thumbnail: string;
-    elements: {
+    elements: mongoose.Types.DocumentArray<{
         id?: mongoose.Types.ObjectId | null | undefined;
         statics?: boolean | null | undefined;
         x?: number | null | undefined;
         y?: number | null | undefined;
-    }[];
+    }, mongoose.Types.Subdocument<mongoose.Types.ObjectId, any, {
+        id?: mongoose.Types.ObjectId | null | undefined;
+        statics?: boolean | null | undefined;
+        x?: number | null | undefined;
+        y?: number | null | undefined;
+    }> & {
+        id?: mongoose.Types.ObjectId | null | undefined;
+        statics?: boolean | null | undefined;
+        x?: number | null | undefined;
+        y?: number | null | undefined;
+    }>;
     createdBy: mongoose.Types.ObjectId;
 }> & {
     _id: mongoose.Types.ObjectId;
@@ -214,12 +274,22 @@ declare const space: mongoose.Model<{
     name: string;
     width: number;
     height: number;
-    elements: {
+    elements: mongoose.Types.DocumentArray<{
         id?: mongoose.Types.ObjectId | null | undefined;
         statics?: boolean | null | undefined;
         x?: number | null | undefined;
         y?: number | null | undefined;
-    }[];
+    }, mongoose.Types.Subdocument<mongoose.Types.ObjectId, any, {
+        id?: mongoose.Types.ObjectId | null | undefined;
+        statics?: boolean | null | undefined;
+        x?: number | null | undefined;
+        y?: number | null | undefined;
+    }> & {
+        id?: mongoose.Types.ObjectId | null | undefined;
+        statics?: boolean | null | undefined;
+        x?: number | null | undefined;
+        y?: number | null | undefined;
+    }>;
     thumbnail?: string | null | undefined;
     createdBy?: mongoose.Types.ObjectId | null | undefined;
     mapId?: mongoose.Types.ObjectId | null | undefined;
@@ -230,12 +300,22 @@ declare const space: mongoose.Model<{
     name: string;
     width: number;
     height: number;
-    elements: {
+    elements: mongoose.Types.DocumentArray<{
         id?: mongoose.Types.ObjectId | null | undefined;
         statics?: boolean | null | undefined;
         x?: number | null | undefined;
         y?: number | null | undefined;
-    }[];
+    }, mongoose.Types.Subdocument<mongoose.Types.ObjectId, any, {
+        id?: mongoose.Types.ObjectId | null | undefined;
+        statics?: boolean | null | undefined;
+        x?: number | null | undefined;
+        y?: number | null | undefined;
+    }> & {
+        id?: mongoose.Types.ObjectId | null | undefined;
+        statics?: boolean | null | undefined;
+        x?: number | null | undefined;
+        y?: number | null | undefined;
+    }>;
     thumbnail?: string | null | undefined;
     createdBy?: mongoose.Types.ObjectId | null | undefined;
     mapId?: mongoose.Types.ObjectId | null | undefined;
@@ -246,12 +326,22 @@ declare const space: mongoose.Model<{
     name: string;
     width: number;
     height: number;
-    elements: {
+    elements: mongoose.Types.DocumentArray<{
         id?: mongoose.Types.ObjectId | null | undefined;
         statics?: boolean | null | undefined;
         x?: number | null | undefined;
         y?: number | null | undefined;
-    }[];
+    }, mongoose.Types.Subdocument<mongoose.Types.ObjectId, any, {
+        id?: mongoose.Types.ObjectId | null | undefined;
+        statics?: boolean | null | undefined;
+        x?: number | null | undefined;
+        y?: number | null | undefined;
+    }> & {
+        id?: mongoose.Types.ObjectId | null | undefined;
+        statics?: boolean | null | undefined;
+        x?: number | null | undefined;
+        y?: number | null | undefined;
+    }>;
     thumbnail?: string | null | undefined;
     createdBy?: mongoose.Types.ObjectId | null | undefined;
     mapId?: mongoose.Types.ObjectId | null | undefined;
@@ -268,12 +358,22 @@ declare const space: mongoose.Model<{
     name: string;
     width: number;
     height: number;
-    elements: {
+    elements: mongoose.Types.DocumentArray<{
         id?: mongoose.Types.ObjectId | null | undefined;
         statics?: boolean | null | undefined;
         x?: number | null | undefined;
         y?: number | null | undefined;
-    }[];
+    }, mongoose.Types.Subdocument<mongoose.Types.ObjectId, any, {
+        id?: mongoose.Types.ObjectId | null | undefined;
+        statics?: boolean | null | undefined;
+        x?: number | null | undefined;
+        y?: number | null | undefined;
+    }> & {
+        id?: mongoose.Types.ObjectId | null | undefined;
+        statics?: boolean | null | undefined;
+        x?: number | null | undefined;
+        y?: number | null | undefined;
+    }>;
     thumbnail?: string | null | undefined;
     createdBy?: mongoose.Types.ObjectId | null | undefined;
     mapId?: mongoose.Types.ObjectId | null | undefined;
@@ -284,12 +384,22 @@ declare const space: mongoose.Model<{
     name: string;
     width: number;
     height: number;
-    elements: {
+    elements: mongoose.Types.DocumentArray<{
         id?: mongoose.Types.ObjectId | null | undefined;
         statics?: boolean | null | undefined;
         x?: number | null | undefined;
         y?: number | null | undefined;
-    }[];
+    }, mongoose.Types.Subdocument<mongoose.Types.ObjectId, any, {
+        id?: mongoose.Types.ObjectId | null | undefined;
+        statics?: boolean | null | undefined;
+        x?: number | null | undefined;
+        y?: number | null | undefined;
+    }> & {
+        id?: mongoose.Types.ObjectId | null | undefined;
+        statics?: boolean | null | undefined;
+        x?: number | null | undefined;
+        y?: number | null | undefined;
+    }>;
     thumbnail?: string | null | undefined;
     createdBy?: mongoose.Types.ObjectId | null | undefined;
     mapId?: mongoose.Types.ObjectId | null | undefined;
@@ -300,12 +410,22 @@ declare const space: mongoose.Model<{
     name: string;
     width: number;
     height: number;
-    elements: {
+    elements: mongoose.Types.DocumentArray<{
         id?: mongoose.Types.ObjectId | null | undefined;
         statics?: boolean | null | undefined;
         x?: number | null | undefined;
         y?: number | null | undefined;
-    }[];
+    }, mongoose.Types.Subdocument<mongoose.Types.ObjectId, any, {
+        id?: mongoose.Types.ObjectId | null | undefined;
+        statics?: boolean | null | undefined;
+        x?: number | null | undefined;
+        y?: number | null | undefined;
+    }> & {
+        id?: mongoose.Types.ObjectId | null | undefined;
+        statics?: boolean | null | undefined;
+        x?: number | null | undefined;
+        y?: number | null | undefined;
+    }>;
     thumbnail?: string | null | undefined;
     createdBy?: mongoose.Types.ObjectId | null | undefined;
     mapId?: mongoose.Types.ObjectId | null | undefined;
@@ -373,4 +493,5 @@ declare const user: mongoose.Model<{
 } & {
     __v: number;
 }>>;
-export { connectDB, avatar, element, map, space, user };
+declare const returnObjectId: (id: string) => mongoose.Types.ObjectId;
+export { connectDB, avatar, element, map, space, user, returnObjectId };

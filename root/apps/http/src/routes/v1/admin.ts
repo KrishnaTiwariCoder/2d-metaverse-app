@@ -6,6 +6,7 @@ import {
   createMapSchema,
 } from "../../types";
 import { avatar, element, map } from "@repo/database";
+import { returnObjectId } from "@repo/database";
 
 export const adminRouter = Router();
 
@@ -146,7 +147,7 @@ adminRouter.post("/map/element", async (req, res) => {
       return;
     }
 
-    mapFound.elements.push({ id: elementId, x, y });
+    mapFound.elements.push({ id: returnObjectId(elementId), x, y });
 
     await mapFound.save();
 

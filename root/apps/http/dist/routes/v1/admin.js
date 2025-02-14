@@ -13,6 +13,7 @@ exports.adminRouter = void 0;
 const express_1 = require("express");
 const types_1 = require("../../types");
 const database_1 = require("@repo/database");
+const database_2 = require("@repo/database");
 exports.adminRouter = (0, express_1.Router)();
 // Create an Element
 exports.adminRouter.post("/element", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -137,7 +138,7 @@ exports.adminRouter.post("/map/element", (req, res) => __awaiter(void 0, void 0,
                 .json({ error: "Element already exists at that position" });
             return;
         }
-        mapFound.elements.push({ id: elementId, x, y });
+        mapFound.elements.push({ id: (0, database_2.returnObjectId)(elementId), x, y });
         yield mapFound.save();
         res.status(200).json({ message: "Element added to map successfully" });
     }
