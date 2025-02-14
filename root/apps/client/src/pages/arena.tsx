@@ -40,7 +40,7 @@ const Arena = () => {
   const setupWebSocket = () => {
     try {
       localWsRef.current = new WebSocket(
-        "wss://https://twod-metaverse-app-ws.onrender.com"
+        "wss://twod-metaverse-app-ws.onrender.com"
       );
 
       localWsRef.current.onopen = async () => {
