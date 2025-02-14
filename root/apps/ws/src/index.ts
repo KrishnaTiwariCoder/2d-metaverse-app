@@ -24,4 +24,4 @@ wss.on("connection", function connection(ws) {
   });
 });
 
-server.listen(process.env.WS_PORT || 3001);
+server.listen(process.env.PORT || 3001);
