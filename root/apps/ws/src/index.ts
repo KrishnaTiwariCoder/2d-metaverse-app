@@ -2,7 +2,7 @@ import { WebSocketServer } from "ws";
 import { connectDB } from "@repo/database";
 import { User } from "./User";
 import express from "express";
-import { createServer } from "http";
+import { createServer } from "https";
 
 const app = express();
 const server = createServer(app);
