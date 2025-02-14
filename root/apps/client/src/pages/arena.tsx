@@ -39,7 +39,9 @@ const Arena = () => {
   // Setup WebSocket connection
   const setupWebSocket = () => {
     try {
-      localWsRef.current = new WebSocket("ws://192.168.0.107:3001");
+      localWsRef.current = new WebSocket(
+        "wss://https://twod-metaverse-app-ws.onrender.com"
+      );
 
       localWsRef.current.onopen = async () => {
         dispatch(setConnectionStatus("connected"));
