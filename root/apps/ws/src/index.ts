@@ -3,8 +3,10 @@ import { connectDB } from "@repo/database";
 import { User } from "./User";
 import express from "express";
 import { createServer } from "https";
+import cors from "cors";
 
 const app = express();
+app.use(cors());
 const server = createServer(app);
 
 const wss = new WebSocketServer({ server });
