@@ -37,18 +37,26 @@ export class User {
         switch (parsedData.type) {
           case "join": {
             const { spaceId, token } = parsedData.payload;
+            console.log(
+              JWT_SECRET,
+              process.env.JWT_SECRET,
+              typeof process.env.JWT_SECRET,
+              typeof JWT_SECRET
+            );
             const { _id: userId, username: name } = jwt.verify(
               token,
               process.env.JWT_SECRET as string
             ) as JwtPayload;
 
             if (!userId) {
+              console.log("because of 1");
               this.ws.close();
               return;
             }
 
             const userFound = await user.findById(userId);
             if (!userFound) {
+              console.log("because of 2");
               this.ws.close();
               return;
             }
@@ -61,6 +69,7 @@ export class User {
             };
 
             if (!spaceFound) {
+              console.log("because of 3");
               this.ws.close();
               return;
             }
@@ -367,6 +376,7 @@ export class User {
         }
       });
     } catch (error) {
+      console.log("because of 4");
       this.ws.close();
     }
   }
