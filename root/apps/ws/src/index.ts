@@ -40,6 +40,7 @@ wss.on("connection", function connection(ws) {
     console.log("user disconnected");
   });
 });
+
 const port = process.env.PORT || 3001;
 server.listen(port, () => {
   console.log("Server is listening on port" + port);

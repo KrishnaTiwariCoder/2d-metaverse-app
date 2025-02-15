@@ -1,2 +1,1 @@
-export const MONGO_URL =
-  "mongodb+srv://Krishna:2cjlf6EcjGihWm2t@cluster0.1v5th.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+export const MONGO_URL = `mongodb+srv://${process.env.DATABASE_USERNAME}:${process.env.DATABASE_PASSWORD}@cluster0.cdtrb.mongodb.net/`;
