@@ -56,6 +56,8 @@ export class User {
             //   height: 500,
             // };
             const spaceFound = await space.findById(spaceId);
+
+            console.log(spaceFound, space.find());
             if (!spaceFound) {
               this.ws.close();
               return;

@@ -98,7 +98,6 @@ const user = mongoose.model("User", userSchema);
 
 const returnObjectId = (id: string) => {
   return new mongoose.Types.ObjectId(id);
-  // return mongoose.Types.ObjectId(id);
 };
 
 export { connectDB, avatar, element, map, space, user, returnObjectId };
