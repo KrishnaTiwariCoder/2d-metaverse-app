@@ -75,7 +75,6 @@ const Arena = () => {
     } catch (err) {
       console.error("WebSocket setup error:", err);
       dispatch(setError("Failed to initialize game connection"));
-      // alert("error: " + err);
     }
   };
 
@@ -86,6 +85,7 @@ const Arena = () => {
     return () => {
       if (localWsRef.current) {
         console.log("yes ws closed");
+
         localWsRef.current.close();
       }
     };

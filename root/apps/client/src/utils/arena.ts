@@ -73,6 +73,7 @@ export const handleServerMessage = (message: any) => {
       break;
     }
     case "user-joined": {
+      if (players.find((p) => p.id === message.payload.userId)) return;
       const payload = {
         id: message.payload.userId,
         x: message.payload.x,

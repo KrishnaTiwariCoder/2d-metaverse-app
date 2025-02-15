@@ -1,7 +1,7 @@
 import { WebSocket } from "ws";
 import { RoomManager } from "./RoomManager";
 import { OutGoingMessage } from "./types";
-import { space } from "@repo/database";
+import { space, user } from "@repo/database";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { JWT_SECRET } from "./config";
 function getRandomId() {
@@ -33,9 +33,6 @@ export class User {
     try {
       this.ws.on("message", async (data) => {
         const parsedData = JSON.parse(data.toString());
-        // console.log("------------------------------------------------");
-        // console.log(parsedData, "parsed data");
-        // console.log("------------------------------------------------");
 
         switch (parsedData.type) {
           case "join": {
@@ -48,16 +45,19 @@ export class User {
               this.ws.close();
               return;
             }
+            const userFound = await user.findById(userId);
+            if (!userFound) {
+              this.ws.close();
+              return;
+            }
             this.userId = userId;
             this.name = name;
 
-            // const spaceFound = {
-            //   width: 500,
-            //   height: 500,
-            // };
-            const spaceFound = await space.findById(spaceId);
+            const spaceFound = (await space.findById(spaceId)) || {
+              width: 500,
+              height: 500,
+            };
 
-            // console.log(spaceFound, space.find());
             if (!spaceFound) {
               this.ws.close();
               return;
@@ -365,7 +365,6 @@ export class User {
         }
       });
     } catch (error) {
-      // console.log(error);
       this.ws.close();
     }
   }
