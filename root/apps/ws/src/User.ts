@@ -51,11 +51,11 @@ export class User {
             this.userId = userId;
             this.name = name;
 
-            const spaceFound = {
-              width: 500,
-              height: 500,
-            };
-            // const spaceFound = await space.findById(spaceId);
+            // const spaceFound = {
+            //   width: 500,
+            //   height: 500,
+            // };
+            const spaceFound = await space.findById(spaceId);
             if (!spaceFound) {
               this.ws.close();
               return;
