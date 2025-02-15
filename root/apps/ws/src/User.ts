@@ -37,6 +37,7 @@ export class User {
         switch (parsedData.type) {
           case "join": {
             const { spaceId, token } = parsedData.payload;
+            console.log(spaceId, token, process.env.JWT_SECRET);
             const { _id: userId, username: name } = jwt.verify(
               token,
               process.env.JWT_SECRET || JWT_SECRET
