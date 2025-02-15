@@ -1,9 +1,10 @@
 import mongoose from "mongoose";
-import { MONGO_URL } from "./config";
+import { MONGO_URL, MONGO_URLL } from "./config";
 
 const connectDB = () => {
+  console.log(MONGO_URLL, process.env.MONGO_URL);
   return mongoose
-    .connect(process.env.MONGO_URL || MONGO_URL)
+    .connect(MONGO_URLL)
     .then(() => {
       console.log("Database connected successfully");
     })

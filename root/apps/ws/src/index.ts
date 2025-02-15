@@ -44,4 +44,10 @@ wss.on("connection", function connection(ws) {
 const port = process.env.PORT || 3001;
 server.listen(port, () => {
   console.log("Server is listening on port" + port);
+  console.log(
+    "hi",
+    process.env.DATABASE_USERNAME,
+    process.env.DATABASE_PASSWORD
+  );
+  // console.log(process.env.DATABASE_USERNAME, process.env.DATABASE_PASSWORD);
 });

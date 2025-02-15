@@ -7,8 +7,9 @@ exports.returnObjectId = exports.user = exports.space = exports.map = exports.el
 const mongoose_1 = __importDefault(require("mongoose"));
 const config_1 = require("./config");
 const connectDB = () => {
+    console.log(config_1.MONGO_URLL, process.env.MONGO_URL);
     return mongoose_1.default
-        .connect(process.env.MONGO_URL || config_1.MONGO_URL)
+        .connect(config_1.MONGO_URLL)
         .then(() => {
         console.log("Database connected successfully");
     })
@@ -83,6 +84,5 @@ const user = mongoose_1.default.model("User", userSchema);
 exports.user = user;
 const returnObjectId = (id) => {
     return new mongoose_1.default.Types.ObjectId(id);
-    // return mongoose.Types.ObjectId(id);
 };
 exports.returnObjectId = returnObjectId;
