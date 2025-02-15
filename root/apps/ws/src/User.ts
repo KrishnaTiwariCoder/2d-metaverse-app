@@ -45,7 +45,7 @@ export class User {
             );
             const { _id: userId, username: name } = jwt.verify(
               token,
-              process.env.JWT_SECRET as string
+              process.env.JWT_SECRET || JWT_SECRET
             ) as JwtPayload;
 
             if (!userId) {
