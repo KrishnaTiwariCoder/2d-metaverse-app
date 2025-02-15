@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "composite": true,
+    "baseUrl": ".",
+    "paths": {
+      "@repo/database": ["packages/database/src"]
+    }
+  },
+  "include": ["packages", "apps"]
+}
