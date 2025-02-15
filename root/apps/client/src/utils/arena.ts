@@ -172,6 +172,6 @@ export const handleServerMessage = (message: any) => {
 // ];
 
 export const tokens = [
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2N2IwNzA1Y2M2MTc0ZDNmMmJmMjAwYWUiLCJ1c2VybmFtZSI6ImtyaXNobmF1c2VyOCIsInR5cGUiOiJ1c2VyIiwiaWF0IjoxNzM5NjIxMzcyfQ.SzNrmn3xTBmY640B6P6dfxjCjCXGJ5N7WPtDqsNzjrs",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2N2IwNzA1Y2M2MTc0ZDNmMmJmMjAwYWUiLCJ1c2VybmFtZSI6ImtyaXNobmF1c2VyOCIsInR5cGUiOiJ1c2VyIiwiaWF0IjoxNzM5NjIyODM5fQ.ip0GaQIX9XOwjumYlrvLCRC6cdG3lUI_fD4l3Eba75w",
 ];
 export const sampleSpaceId = "67b0568e71118139e495d158";
