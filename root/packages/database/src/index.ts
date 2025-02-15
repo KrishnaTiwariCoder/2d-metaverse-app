@@ -1,17 +1,12 @@
+import dotenv from "dotenv";
+dotenv.config();
+
 import mongoose from "mongoose";
-import { MONGO_URL, MONGO_URLL } from "./config";
+import { MONGO_URL } from "./config";
 
 const connectDB = () => {
-  // console.log(MONGO_URLL, process.env.MONGO_URL);
-  console.log(MONGO_URL, "URL");
-  console.log(MONGO_URLL, "URLL");
-  console.log(
-    process.env.DATABASE_USERNAME,
-    process.env.DATABASE_PASSWORD,
-    "envs"
-  );
   return mongoose
-    .connect(MONGO_URL)
+    .connect(process.env.MONGO_URL || MONGO_URL)
     .then(() => {
       console.log("Database connected successfully");
     })

@@ -57,7 +57,7 @@ export class User {
             // };
             const spaceFound = await space.findById(spaceId);
 
-            console.log(spaceFound, space.find());
+            // console.log(spaceFound, space.find());
             if (!spaceFound) {
               this.ws.close();
               return;

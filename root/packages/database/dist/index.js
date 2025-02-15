@@ -4,12 +4,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.returnObjectId = exports.user = exports.space = exports.map = exports.element = exports.avatar = exports.connectDB = void 0;
+const dotenv_1 = __importDefault(require("dotenv"));
+dotenv_1.default.config();
 const mongoose_1 = __importDefault(require("mongoose"));
 const config_1 = require("./config");
 const connectDB = () => {
-    console.log(config_1.MONGO_URLL, process.env.MONGO_URL);
     return mongoose_1.default
-        .connect(config_1.MONGO_URLL)
+        .connect(process.env.MONGO_URL || config_1.MONGO_URL)
         .then(() => {
         console.log("Database connected successfully");
     })

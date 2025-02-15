@@ -39,9 +39,7 @@ const Arena = () => {
   // Setup WebSocket connection
   const setupWebSocket = () => {
     try {
-      localWsRef.current = new WebSocket(
-        "wss://twod-metaverse-app-ws.onrender.com"
-      );
+      localWsRef.current = new WebSocket("ws://192.168.247.8:3001");
 
       localWsRef.current.onopen = async () => {
         dispatch(setConnectionStatus("connected"));
@@ -90,7 +88,7 @@ const Arena = () => {
   const handleDummyData = () => {
     const used = Math.floor(Math.random() * tokens.length);
     dispatch(storeToken({ token: tokens[used], myId: "", name: "" }));
-    dispatch(setSpaceId("6787acdaa29ceb6ed47a6f4a"));
+    dispatch(setSpaceId("67b0568e71118139e495d158"));
   };
   useEffect(() => {
     const canvas = canvasRef.current;
