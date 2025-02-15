@@ -37,15 +37,16 @@ export class User {
         switch (parsedData.type) {
           case "join": {
             const { spaceId, token } = parsedData.payload;
-            console.log(spaceId, token, process.env.JWT_SECRET);
             const { _id: userId, username: name } = jwt.verify(
               token,
-              process.env.JWT_SECRET || JWT_SECRET
+              process.env.JWT_SECRET as string
             ) as JwtPayload;
+
             if (!userId) {
               this.ws.close();
               return;
             }
+
             const userFound = await user.findById(userId);
             if (!userFound) {
               this.ws.close();
