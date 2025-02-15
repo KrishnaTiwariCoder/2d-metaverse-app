@@ -1,5 +1,10 @@
 import { useEffect, useRef } from "react";
-import { getStatusColor, handleServerMessage, tokens } from "../utils/arena";
+import {
+  getStatusColor,
+  handleServerMessage,
+  sampleSpaceId,
+  tokens,
+} from "../utils/arena";
 import Canvas from "../components/canvas";
 import ChatRoom from "../components/chatbox";
 import { useSelector } from "react-redux";
@@ -7,6 +12,7 @@ import { useDispatch } from "react-redux";
 import { setConnectionStatus, setError, setSpaceId } from "../redux/gameslice";
 import { storeToken } from "../redux/authslice";
 import VoiceSection from "../components/voicesection";
+import { WS_URL } from "../utils/urls";
 
 const Arena = () => {
   const token = useSelector((state: any) => state.auth.token);
@@ -39,7 +45,7 @@ const Arena = () => {
   // Setup WebSocket connection
   const setupWebSocket = () => {
     try {
-      localWsRef.current = new WebSocket("ws://192.168.247.8:3001");
+      localWsRef.current = new WebSocket(WS_URL);
 
       localWsRef.current.onopen = async () => {
         dispatch(setConnectionStatus("connected"));
@@ -88,7 +94,7 @@ const Arena = () => {
   const handleDummyData = () => {
     const used = Math.floor(Math.random() * tokens.length);
     dispatch(storeToken({ token: tokens[used], myId: "", name: "" }));
-    dispatch(setSpaceId("67b0568e71118139e495d158"));
+    dispatch(setSpaceId(sampleSpaceId));
   };
   useEffect(() => {
     const canvas = canvasRef.current;
