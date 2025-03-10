@@ -1,5 +1,5 @@
 import { useSelector } from "react-redux";
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
 const useWebRTC = ({ wsRef }: any) => {
   const localStream = useRef<MediaStream | null>(null);
@@ -46,7 +46,8 @@ const useWebRTC = ({ wsRef }: any) => {
   };
 
   const createPeerConnection = (targetPeerId: string, createOffer: boolean) => {
-    if (connections.current[targetPeerId]) return;
+    if (connections.current[targetPeerId])
+      return connections.current[targetPeerId];
 
     const peerConnection = new RTCPeerConnection({
       iceServers: [
@@ -205,23 +206,20 @@ const useWebRTC = ({ wsRef }: any) => {
     }
   };
 
-  const startCapture = async () => {
+  const startCapture = useCallback(async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: true,
-        video: true, // Now requesting video as well
+        video: true,
       });
-
       localStream.current = stream;
-
-      // Display local video
       if (localVideoRef.current) {
         localVideoRef.current.srcObject = stream;
       }
     } catch (err) {
       console.error("Error accessing local media stream:", err);
     }
-  };
+  }, []);
 
   const toggleMute = (type: "audio" | "video") => {
     if (localStream.current) {
