@@ -1,0 +1,569 @@
+{
+	"info": {
+		"_postman_id": "b03b4b2b-9ac6-4a06-ac3a-810f39d2c228",
+		"name": "2d-metaverse",
+		"description": "for the github project ( [https://github.com/KrishnaTiwariCoder/2d-metaverse-app](https://github.com/KrishnaTiwariCoder/2d-metaverse-app) )",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "14426185"
+	},
+	"item": [
+		{
+			"name": "admin",
+			"item": [
+				{
+					"name": "create an element",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"imageUrl\":\"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSnghGCzwnSTLy-et0ZYJQUPI6cCbDG0dV_2A&s\",\r\n    \"height\":5,\r\n    \"width\":5,\r\n    \"statics\":true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{URL}}/admin/element",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"admin",
+								"element"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update an element",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"imageUrl\":\"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSnghGCzwnSTLy-et0ZYJQUPI6cCbDG0dV_2A&s\"   \r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{URL}}/admin/element/678251dab1886153107d353b",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"admin",
+								"element",
+								"678251dab1886153107d353b"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "create an avatar",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\":\"krishna av\",\r\n    \"imageUrl\":\"https://img.freepik.com/free-psd/3d-illustration-person-with-sunglasses_23-2149436188.jpg?semt=ais_hybrid\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{URL}}/admin/avatar",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"admin",
+								"avatar"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "create an map",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"thumbnail\":\"https://d1csarkz8obe9u.cloudfront.net/posterpreviews/map%2C-location%2Cstatus-design-template-31eef5c8bea5bed03f304bfc89575de1_screen.jpg?ts=1637697281\",\r\n    \"dimensions\":\"20x20\",\r\n    \"name\":\"europe\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{URL}}/admin/map",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"admin",
+								"map"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "adding element to map",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"elementId\":\"678251dab1886153107d353b\",\r\n    \"mapId\":\"6782577cd3bd3645ba0ef583\",\r\n    \"x\":12,\r\n    \"y\":50\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{URL}}/admin/map/element",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"admin",
+								"map",
+								"element"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"auth": {
+				"type": "bearer",
+				"bearer": [
+					{
+						"key": "token",
+						"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NzgyNTExYWIxODg2MTUzMTA3ZDM1MzQiLCJ1c2VybmFtZSI6ImtyaXNobmEiLCJ0eXBlIjoiYWRtaW4iLCJpYXQiOjE3MzY2ODI5MTZ9.t3cIyE8Tn4oW4VfzXQebwFDsHFUkJyCp4yERjPUl9sw",
+						"type": "string"
+					}
+				]
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "auth",
+			"item": [
+				{
+					"name": "signin",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\":\"krishnauser4\",\r\n    \"password\":\"12345678\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{URL}}/signin",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"signin"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "signup",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\":\"krishnauser8\",\r\n    \"password\":\"12345678\",\r\n    \"type\":\"user\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{URL}}/signup",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"signup"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "user",
+			"item": [
+				{
+					"name": "update avatar",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"avatarId\":\"6782531eb1886153107d3546\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{URL}}/user/metadata",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"user",
+								"metadata"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get avatars of multiple users",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{URL}}/user/metadata/bulk?ids=[67825a6a1f956f6106922db9,6782511ab1886153107d3534,678249253b7a7f16e0a81a21]",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"user",
+								"metadata",
+								"bulk"
+							],
+							"query": [
+								{
+									"key": "ids",
+									"value": "[67825a6a1f956f6106922db9,6782511ab1886153107d3534,678249253b7a7f16e0a81a21]"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "space",
+			"item": [
+				{
+					"name": "create a space without map",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\":\"test_space\",\r\n    \"dimensions\":\"500x500\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{URL}}/space",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"space"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "create a space with map",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\":\"test_space\",\r\n    \"dimensions\":\"1000x1000\",\r\n    \"mapId\":\"\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{URL}}/space",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"space"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete a space",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"spaceId\":\"67825b231f956f6106922dc0\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{URL}}/space/delete",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"space",
+								"delete"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get all spaces",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{URL}}/space/all",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"space",
+								"all"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get a space",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{URL}}/space/6783adc497f7fea352a3d80b",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"space",
+								"6783adc497f7fea352a3d80b"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "add an element to space",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"elementId\":\"678251dab1886153107d353b\",\r\n    \"spaceId\":\"67825b6d1f956f6106922dc7\",\r\n    \"x\":16,\r\n    \"y\":23\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{URL}}/space/element",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"space",
+								"element"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete an element from the space",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"spaceId\":\"67825b6d1f956f6106922dc7\",\r\n    \"elementId\":\"678251dab1886153107d353b\",\r\n    \"x\":16,\r\n    \"y\":23  \r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{URL}}/space/element",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"space",
+								"element"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "avatars",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{URL}}/avatars",
+					"host": [
+						"{{URL}}"
+					],
+					"path": [
+						"avatars"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "elements",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{URL}}/elements",
+					"host": [
+						"{{URL}}"
+					],
+					"path": [
+						"elements"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "New Request",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://twod-metaverse-app-ws.onrender.com",
+					"protocol": "https",
+					"host": [
+						"twod-metaverse-app-ws",
+						"onrender",
+						"com"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{TOKEN}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "TOKEN",
+			"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2N2IwNTY2MDcxMTE4MTM5ZTQ5NWQxNTQiLCJ1c2VybmFtZSI6ImtyaXNobmF1c2VyMyIsInR5cGUiOiJ1c2VyIiwiaWF0IjoxNzM5NjA5NzAzfQ.6hU90LuFOpJZicY2kIBz-E4GSiJKCVWk3aKdiu73HL8",
+			"type": "string"
+		},
+		{
+			"key": "URL",
+			"value": "http://localhost:3000",
+			"type": "string",
+			"disabled": true
+		}
+	]
+}
