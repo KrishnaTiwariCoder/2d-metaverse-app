@@ -13,13 +13,15 @@ import { setConnectionStatus, setError, setSpaceId } from "../redux/gameslice";
 import { storeToken } from "../redux/authslice";
 import VoiceSection from "../components/voicesection";
 import { WS_URL } from "../utils/urls";
+import { Player } from "../redux/playerslice";
 
 const Arena = () => {
   const token = useSelector((state: any) => state.auth.token);
   const canvasRef = useRef<any>(null);
-  const { spaceId, myId, error, connectionStatus } = useSelector(
+  const { spaceId, error, connectionStatus } = useSelector(
     (state: any) => state.game
   );
+  const { myId } = useSelector((state: any) => state.auth);
   const { players } = useSelector((state: any) => state.players);
   const localWsRef = useRef<WebSocket | null>(null);
 
@@ -33,7 +35,7 @@ const Arena = () => {
       dispatch(setError("Missing required parameters: token and spaceId"));
       return;
     } else {
-      dispatch(storeToken({ token: localToken, myId: "", name: "" }));
+      dispatch(storeToken(token));
       dispatch(setSpaceId(localSpaceId));
     }
 
@@ -93,7 +95,7 @@ const Arena = () => {
   // Dummy data for testing
   const handleDummyData = () => {
     const used = Math.floor(Math.random() * tokens.length);
-    dispatch(storeToken({ token: tokens[used], myId: "", name: "" }));
+    dispatch(storeToken(tokens[used]));
     dispatch(setSpaceId(sampleSpaceId));
   };
   useEffect(() => {
@@ -145,15 +147,23 @@ const Arena = () => {
       </div>
     );
   }
-
+  const logOut = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("spaceId");
+    localStorage.removeItem("myId");
+    window.location.reload();
+  };
   return (
     <div className="flex flex-col w-full min-h-screen gap-4 p-4 bg-gray-900">
       {}
+
       <VoiceSection ws={localWsRef} />
       <div className="bg-gray-800 rounded-lg border border-gray-700 p-4">
         <div className={`mb-2 ${getStatusColor(connectionStatus)}`}>
           Status: {connectionStatus}
         </div>
+        <button onClick={logOut}>Reset</button>
+        <div>{players.find((p: Player) => p.id === myId)?.name}</div>
       </div>
       <div className="flex-1 bg-gray-800 rounded-lg border border-gray-700">
         <div className="flex items-center justify-center w-full h-full min-h-[400px] p-4">

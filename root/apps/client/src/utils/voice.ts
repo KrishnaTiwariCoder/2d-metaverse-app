@@ -163,6 +163,7 @@ const useWebRTC = ({ wsRef }: any) => {
     switch (parsedMessage.type) {
       case "add-peer": {
         const { userId, createOffer } = parsedMessage.payload;
+        console.log(userId, createOffer);
         if (userId === myId) return;
         createPeerConnection(userId, createOffer);
         break;

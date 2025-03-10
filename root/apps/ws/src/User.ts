@@ -33,16 +33,13 @@ export class User {
     try {
       this.ws.on("message", async (data) => {
         const parsedData = JSON.parse(data.toString());
+        console.log("---------------");
+        // console.log(parsedData);
+        console.log("---------------");
 
         switch (parsedData.type) {
           case "join": {
             const { spaceId, token } = parsedData.payload;
-            console.log(
-              JWT_SECRET,
-              process.env.JWT_SECRET,
-              typeof process.env.JWT_SECRET,
-              typeof JWT_SECRET
-            );
             const { _id: userId, username: name } = jwt.verify(
               token,
               process.env.JWT_SECRET || JWT_SECRET
