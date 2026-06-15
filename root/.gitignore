@@ -25,7 +25,7 @@ coverage
 .next/
 out/
 build
-dist
+
 
 
 # Debug
@@ -36,8 +36,6 @@ yarn-error.log*
 # Misc
 .DS_Store
 *.pem
-config.ts
-config.js
 constants.ts
 messages.json
 messages.md

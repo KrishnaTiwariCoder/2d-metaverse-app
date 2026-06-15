@@ -78,7 +78,7 @@ spaceRouter.get("/all", async (req, res) => {
   try {
     // only get the username of the creator
     const spaces = await space
-      .find({ createdBy: req.user._id })
+      .find()
       .populate("createdBy", "username");
     // const spaces = await space.find({ createdBy: req.user._id });
     const response = spaces.map((spaceE) => ({
@@ -90,7 +90,8 @@ spaceRouter.get("/all", async (req, res) => {
         "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcREO3tkIJnmJZcWmgLLR-z973QVHQ8zbwDGnw&s",
       creator: spaceE.createdBy,
     }));
-    res.status(200).json({ spaces: response });
+    const maps = await map.find();
+    res.status(200).json({ spaces: response , maps});
   } catch (err) {
     res.status(500).json({ error: "Internal server error", message: err });
     return;
@@ -184,10 +185,7 @@ spaceRouter.delete("/element", async (req, res) => {
       res.status(400).json({ error: "Element not found" });
       return;
     }
-    // spaceFound.elements = spaceFound.elements.filter((element) => {
-    //   if (element.id === elementId) return false;
-    //   return true;
-    // });
+    
     spaceFound!.set(
       "elements",
       spaceFound.elements.filter(

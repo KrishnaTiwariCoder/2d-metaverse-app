@@ -2,7 +2,7 @@ import { user } from "@repo/database";
 import { Router } from "express";
 import bcrypt from "bcrypt";
 import { loginSchema, signupSchema } from "../../types";
-import { generateLoginToken } from "../../services";
+import { generateLoginToken, verifyToken } from "../../services";
 
 export const authRouter = Router();
 
@@ -36,7 +36,7 @@ authRouter.post("/signin", async (req, res) => {
 
     // Generate a JWT token
     const token = generateLoginToken(userFound);
-    res.status(200).json({ token });
+    res.status(200).json({ token , user:userFound });
     return;
   } catch (err) {
     console.error(err);
@@ -78,4 +78,20 @@ authRouter.post("/signup", async (req, res) => {
     res.status(403).json({ error: "Internal server error" });
     return;
   }
+});
+
+
+authRouter.get("/me", async (req, res) => {
+  const token = req.headers.authorization?.split(" ")[1];
+  if (!token) {
+    res.status(403).json({ error: "Token is missing" });
+    return;
+  }
+  const decoded = verifyToken(token);
+  if (!decoded) {
+    res.status(403).json({ error: "Token is invalid or expired" });
+    return;
+  }
+ res.status(200).json({ user: decoded });
+  return;
 });

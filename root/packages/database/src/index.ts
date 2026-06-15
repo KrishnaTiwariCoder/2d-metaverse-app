@@ -1,9 +1,12 @@
+import dotenv from "dotenv";
+dotenv.config();
+
 import mongoose from "mongoose";
 import { MONGO_URL } from "./config";
 
 const connectDB = () => {
   return mongoose
-    .connect(MONGO_URL)
+    .connect(process.env.MONGO_URL || MONGO_URL)
     .then(() => {
       console.log("Database connected successfully");
     })
@@ -96,4 +99,8 @@ const userSchema = new mongoose.Schema(
 
 const user = mongoose.model("User", userSchema);
 
-export { connectDB, avatar, element, map, space, user };
+const returnObjectId = (id: string) => {
+  return new mongoose.Types.ObjectId(id);
+};
+
+export { connectDB, avatar, element, map, space, user, returnObjectId };

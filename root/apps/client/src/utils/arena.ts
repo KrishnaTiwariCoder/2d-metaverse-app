@@ -1,14 +1,14 @@
 import store, { appDispatch } from "../redux/store";
-import { Message, receive } from "../redux/chatSlice";
+import { Message, receive } from "../redux/chatslice";
 
 import {
   Player,
   setCurrentPosition,
   setError,
   setSpaceDimensions,
-} from "../redux/gameSlice";
-import { setCurrentUser, setMyId } from "../redux/authSlice";
-import { addPlayer, setPlayer, setPlayers } from "../redux/playerSlice";
+} from "../redux/gameslice";
+import { setCurrentUser, setMyId } from "../redux/authslice";
+import { addPlayer, setPlayer, setPlayers } from "../redux/playerslice";
 
 export const getStatusColor = (connectionStatus: any) => {
   switch (connectionStatus) {
@@ -55,7 +55,6 @@ export const handleServerMessage = (message: any) => {
           name: message.payload.users.find((u: any) => u.id == myId).name,
         })
       );
-      localStorage.setItem("myId", myId);
       break;
     }
     case "movement": {
@@ -73,6 +72,7 @@ export const handleServerMessage = (message: any) => {
       break;
     }
     case "user-joined": {
+      if (players.find((p) => p.id === message.payload.userId)) return;
       const payload = {
         id: message.payload.userId,
         x: message.payload.x,
@@ -159,9 +159,3 @@ export const handleServerMessage = (message: any) => {
   }
 };
 
-export const tokens = [
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NzgyNTExYWIxODg2MTUzMTA3ZDM1MzQiLCJ1c2VybmFtZSI6ImtyaXNobmEiLCJ0eXBlIjoiYWRtaW4iLCJpYXQiOjE3MzcxMTQ0OTl9.kRfGkEe-ZwF06LSwgO85nCJX7JgPW_Ge9BXYSD-pLhY",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NzgyNDkyNTNiN2E3ZjE2ZTBhODFhMjEiLCJ1c2VybmFtZSI6ImtyaXNobmEyIiwidHlwZSI6ImFkbWluIiwiaWF0IjoxNzM3MTI0MjYzfQ.ClMqobwuhW7fVSZAcxIdlLeEshhGF0HD537l1nFYFhs",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NzgyNjZmZTlhMzUyMTMyMWQ0ZDE1OTEiLCJ1c2VybmFtZSI6ImtyaXNobmF1c2VyMiIsInR5cGUiOiJ1c2VyIiwiaWF0IjoxNzM3Mjk2NTg3fQ.40gI_b5_fLBBH04oNDiTaKy6DsmLd6l8pTEXskavJRk",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NzgyOTliZDM1ZGJmMGM2NzNkOTZhNWYiLCJ1c2VybmFtZSI6ImtyaXNobmF1c2VyMyIsInR5cGUiOiJ1c2VyIiwiaWF0IjoxNzM3Mjk2NjE0fQ.Uodtw3qsnmbFwTqDalJaH4asftp3MW5CFgxhh4QSs0U",
-];

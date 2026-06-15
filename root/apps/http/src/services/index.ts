@@ -1,4 +1,4 @@
-import jwt, { verify } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import { JWT_SECRET } from "../contants";
 
 export const generateLoginToken = (data: any) => {
@@ -14,7 +14,7 @@ export const generateLoginToken = (data: any) => {
 
 export const verifyToken = (token: string) => {
   try {
-    const decoded = verify(token, process.env.JWT_SECRET || JWT_SECRET);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || JWT_SECRET);
     return decoded;
   } catch (err) {
     console.error(err);

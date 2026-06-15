@@ -1,11 +1,12 @@
 {
-  "name": "root",
+  "name": "repo",
   "private": true,
   "scripts": {
-    "build": "turbo build",
+    "build": "turbo run build",
     "dev": "turbo dev",
     "lint": "turbo lint",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "start": "turbo run start --parallel"
   },
   "devDependencies": {
     "prettier": "^3.2.5",

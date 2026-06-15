@@ -1,13 +1,32 @@
 import { WebSocketServer } from "ws";
 import { connectDB } from "@repo/database";
 import { User } from "./User";
-import express from "express";
+import express, { Request, Response } from "express";
 import { createServer } from "http";
+import cors from "cors";
 
 const app = express();
+app.use(cors({ origin: "*" }));
 const server = createServer(app);
 
-const wss = new WebSocketServer({ server });
+const wss = new WebSocketServer({
+  server,
+  clientTracking: true,
+  perMessageDeflate: {
+    zlibDeflateOptions: {
+      chunkSize: 1024,
+      memLevel: 7,
+      level: 3,
+    },
+    zlibInflateOptions: {
+      chunkSize: 10 * 1024,
+    },
+  },
+});
+
+app.get("/", (req: Request, res: Response) => {
+  res.send("Hello World");
+}); // Health check
 
 connectDB();
 
@@ -22,4 +41,5 @@ wss.on("connection", function connection(ws) {
   });
 });
 
-server.listen(3001);
+const port = process.env.PORT || 3001;
+server.listen(port);

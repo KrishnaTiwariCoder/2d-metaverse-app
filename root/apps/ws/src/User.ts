@@ -1,7 +1,7 @@
 import { WebSocket } from "ws";
 import { RoomManager } from "./RoomManager";
 import { OutGoingMessage } from "./types";
-import { space } from "@repo/database";
+import { space, user } from "@repo/database";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { JWT_SECRET } from "./config";
 function getRandomId() {
@@ -33,30 +33,40 @@ export class User {
     try {
       this.ws.on("message", async (data) => {
         const parsedData = JSON.parse(data.toString());
-        console.log("------------------------------------------------");
-        console.log(parsedData, "parsed data");
-        console.log("------------------------------------------------");
+        console.log("---------------");
+        // console.log(parsedData);
+        console.log("---------------");
 
         switch (parsedData.type) {
           case "join": {
             const { spaceId, token } = parsedData.payload;
             const { _id: userId, username: name } = jwt.verify(
               token,
-              JWT_SECRET
+              process.env.JWT_SECRET || JWT_SECRET
             ) as JwtPayload;
+
             if (!userId) {
+              console.log("because of 1");
+              this.ws.close();
+              return;
+            }
+
+            const userFound = await user.findById(userId);
+            if (!userFound) {
+              console.log("because of 2");
               this.ws.close();
               return;
             }
             this.userId = userId;
             this.name = name;
 
-            const spaceFound = {
+            const spaceFound = (await space.findById(spaceId)) || {
               width: 500,
               height: 500,
             };
-            // const spaceFound = await space.findById(spaceId);
+
             if (!spaceFound) {
+              console.log("because of 3");
               this.ws.close();
               return;
             }
@@ -168,7 +178,7 @@ export class User {
             const xDisplacement = Math.abs(MoveX - this.x);
             const yDisplacement = Math.abs(MoveY - this.y);
             if (MoveX < 0 || MoveY < 0) {
-              console.log("rejected cause of negative displacement");
+              // console.log("rejected cause of negative displacement");
               this.send({
                 type: "movement-rejected",
                 payload: {
@@ -184,7 +194,7 @@ export class User {
             ) {
               //reject movement if the x and y are more than the width and height of the space
               if (MoveX > this.spaceWidth! || MoveY > this.spaceHeight!) {
-                console.log("rejected cause of space width and height");
+                // console.log("rejected cause of space width and height");
                 this.send({
                   type: "movement-rejected",
                   payload: {
@@ -204,7 +214,7 @@ export class User {
                     u.userId !== this.userId
                 );
               if (otherUser) {
-                console.log("rejected cause of other user");
+                // console.log("rejected cause of other user");
                 this.send({
                   type: "movement-rejected",
                   payload: {
@@ -230,7 +240,7 @@ export class User {
               );
               return;
             } else {
-              console.log("rejected cause of displacement");
+              // console.log("rejected cause of displacement");
               this.send({
                 type: "movement-rejected",
                 payload: {
@@ -363,7 +373,7 @@ export class User {
         }
       });
     } catch (error) {
-      console.log(error);
+      console.log("because of 4");
       this.ws.close();
     }
   }

@@ -1,16 +1,16 @@
 import { configureStore } from "@reduxjs/toolkit";
-import chatReducer from "./chatSlice"; // Import your slice reducer
-import authReducer from "./authSlice";
-import gameReducer from "./gameSlice";
-import playerReducer from "./playerSlice";
-
+import chatReducer from "./chatslice"; // Import your slice reducer
+import authReducer from "./authslice";
+import gameReducer from "./gameslice";
+import playerReducer from "./playerslice";
+import spaceReducer from "./spaceSlice"
 // Create and export the store
 export const store = configureStore({
   reducer: {
     chats: chatReducer, // Add more reducers here
     game: gameReducer,
     auth: authReducer,
-
+    spaces:spaceReducer,
     players: playerReducer,
   },
 });
