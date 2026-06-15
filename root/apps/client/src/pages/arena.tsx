@@ -1,27 +1,31 @@
 import { useEffect, useRef } from "react";
+
 import {
   getStatusColor,
   handleServerMessage,
 } from "../utils/arena";
+import { WS_URL } from "../utils/urls";
+
 import Canvas from "../components/canvas";
 import ChatRoom from "../components/chatbox";
+import VoiceSection from "../components/voicesection";
+
 import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
-import { setConnectionStatus, setError } from "../redux/gameslice";
-import { logOut } from "../redux/authslice";
-import VoiceSection from "../components/voicesection";
-import { WS_URL } from "../utils/urls";
-import { Player } from "../redux/playerslice";
+
 import { useParams } from "react-router-dom";
+
+import { logOut } from "../redux/authslice";
+import { Player } from "../redux/playerslice";
 import { Space } from "../redux/spaceSlice";
+import { setConnectionStatus, setError, setSpaceDimensions, setSpaceId } from "../redux/gameslice";
+
 const Arena = () => {
-  const {id:spaceId} = useParams();
+  const {id : spaceId} = useParams();
   const {spaces} = useSelector((state:any)=>state.spaces)
   const { myId ,token } = useSelector((state: any) => state.auth);
   const canvasRef = useRef<any>(null);
-  const { connectionStatus } = useSelector(
-    (state: any) => state.game
-  );
+  const { connectionStatus } = useSelector((state: any) => state.game);
   const { players } = useSelector((state: any) => state.players);
   const localWsRef = useRef<WebSocket | null>(null);
 
@@ -51,30 +55,38 @@ const Arena = () => {
         dispatch(setConnectionStatus("error"));
         console.error("WebSocket error:", error);
       };
+      
       localWsRef.current.onclose = () => {
         console.log("WebSocket closed");
         dispatch(setConnectionStatus("disconnected"));
-        //  socket = null; // Reset on close
-        localWsRef.current = null;
       };
     } catch (err) {
       console.error("WebSocket setup error:", err);
       dispatch(setError("Failed to initialize game connection"));
     }
   };
-
+  const reconnect = () => {
+  setTimeout(() => {
+    console.log('reconnecting...');
+    setupWebSocket(); 
+  }, 1000); 
+};
   useEffect(() => {
-    if (!token || !spaceId) return;
+    if (localWsRef.current?.readyState === WebSocket.OPEN) return;
     setupWebSocket();
 
     return () => {
       if (localWsRef.current) {
         console.log("yes ws closed");
-
-        localWsRef.current.close();
+        if (localWsRef.current.readyState === WebSocket.OPEN || localWsRef.current.readyState === WebSocket.CONNECTING) {
+          localWsRef.current.close();
+          if (!localWsRef.current) {
+            reconnect();
+          }
+        }
       }
     };
-  }, [token, spaceId]);
+  }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -100,14 +112,25 @@ const Arena = () => {
   const logOutBtn = () => {
     dispatch(logOut());
   };
-  if (!spaces.find((space: Space) => space.id == spaceId)) {
+
+  const space = spaces.find((space:Space)=>space.id == spaceId);
+  useEffect(() => { 
+
+    if(!spaceId || !space) return;
+    dispatch(setSpaceId(spaceId));
+    dispatch(setSpaceDimensions({width : space.dimensions.x , height : space.dimensions.y}));
+  },[spaceId, spaces])
+  
+  if (!space || !spaceId) {
     return <div>404</div>;
-  }
+  } 
+  
   return (
     <div className="flex flex-col w-full min-h-screen gap-4 p-4 bg-gray-900">
       {}
 
-      <VoiceSection ws={localWsRef} />
+      {/* <VoiceSection ws={localWsRef} /> */}
+      <VoiceSection/>
       <div className="bg-gray-800 rounded-lg border border-gray-700 p-4">
         <div className={`mb-2 ${getStatusColor(connectionStatus)}`}>
           Status: {connectionStatus}

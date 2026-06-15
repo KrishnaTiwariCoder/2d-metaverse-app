@@ -36,21 +36,26 @@ const Canvas = ({ canvasRef, wsRef }: any) => {
         default:
           return;
       }
-      wsRef.current?.send(
-        JSON.stringify({
-          type: "move",
-          payload: { x: newX, y: newY },
-        })
-      );
-      appDispatch(setCurrentPosition({ x: newX, y: newY }));
+      if(wsRef.current?.readyState == WebSocket.OPEN) {
+        
+        wsRef.current?.send(
+          JSON.stringify({
+            type: "move",
+            payload: { x: newX, y: newY },
+          })
+        );
+        appDispatch(setCurrentPosition({ x: newX, y: newY }));
+        const toAdd = {
+          ...players.find((p: Player) => p.id == myId),
+          x: newX,
+          y: newY,
+        };
+  
+        appDispatch(setPlayer(toAdd));
+      } else {
+        console.error("WebSocket is not open. Cannot send move command.");
+      }
 
-      const toAdd = {
-        ...players.find((p: Player) => p.id == myId),
-        x: newX,
-        y: newY,
-      };
-
-      appDispatch(setPlayer(toAdd));
     };
 
     window.addEventListener("keydown", handleKeyDown);

@@ -26,12 +26,14 @@ export const getStatusColor = (connectionStatus: any) => {
 };
 
 export const sendMessage = (message: any, wsRef: any) => {
-  wsRef.current!.send(
-    JSON.stringify({
-      type: "send-message",
-      payload: message,
-    })
-  );
+  if (wsRef.current!.readyState === WebSocket.OPEN) {
+    wsRef.current!.send(
+      JSON.stringify({
+        type: "send-message",
+        payload: message,
+      })
+    );
+  }
 };
 
 export const handleServerMessage = (message: any) => {

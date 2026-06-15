@@ -1,22 +1,24 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { Player } from "../redux/playerslice";
 import { useSelector } from "react-redux";
-import useWebRTC from "../utils/voice";
+// import useWebRTC from "../utils/voice";
 
-interface VoiceSectionProps {
-  ws: React.RefObject<WebSocket>;
-}
+// interface VoiceSectionProps {
+//   ws: React.RefObject<WebSocket>;
+// }
 
-const VoiceSection = ({ ws }: VoiceSectionProps) => {
+// const VoiceSection = ({ ws }: VoiceSectionProps) => {
+ const VoiceSection = ()=> {
   const players = useSelector((state: any) => state.players.players);
-  const myId = useSelector((state: any) => state.auth.myId);
+  const username = useSelector((state: any) => state.auth.currentUser.username);
+  const myId = useSelector((state:any)=>state.auth.myId);
 
-  const { startCapture, toggleMute, audioRefs, videoRefs, localVideoRef } =
-    useWebRTC({ wsRef: ws });
+  // const { startCapture, toggleMute, audioRefs, videoRefs, localVideoRef } =
+  //   useWebRTC({ wsRef: ws });
 
-  useEffect(() => {
-    startCapture();
-  });
+  // useEffect(() => {
+  //   startCapture();
+  // });
 
   // useEffect(() => {
   //   // Initialize media capture once
@@ -57,9 +59,9 @@ const VoiceSection = ({ ws }: VoiceSectionProps) => {
   //   };
   // }, []);
 
-  const handleToggleMute = (type: "audio" | "video") => {
-    toggleMute(type);
-  };
+  // const handleToggleMute = (type: "audio" | "video") => {
+  //   toggleMute(type);
+  // };
 
   return (
     <div className="bg-gray-800 rounded-lg border border-gray-700 p-4 mb-4">
@@ -67,7 +69,7 @@ const VoiceSection = ({ ws }: VoiceSectionProps) => {
 
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {/* Local video */}
-        <div className="relative bg-gray-900 rounded-lg overflow-hidden aspect-video">
+        {/* <div className="relative bg-gray-900 rounded-lg overflow-hidden aspect-video">
           <video
             ref={localVideoRef}
             autoPlay
@@ -120,33 +122,38 @@ const VoiceSection = ({ ws }: VoiceSectionProps) => {
               </svg>
             </button>
           </div>
-        </div>
+        </div> */}
+        <div className="relative bg-gray-900 rounded-lg overflow-hidden aspect-video">{username}</div>
 
         {/* Remote videos */}
         {players
           .filter((player: Player) => player.id !== myId)
           .map((player: Player) => (
-            <div
-              key={player.id}
-              className="relative bg-gray-900 rounded-lg overflow-hidden aspect-video"
-            >
-              <video
-                ref={(el) => {
-                  if (el) videoRefs.current[player.id] = el;
-                }}
-                autoPlay
-                playsInline
-                className="w-full h-full object-cover"
-              />
-              <audio
-                ref={(el) => {
-                  if (el) audioRefs.current[player.id] = el;
-                }}
-                autoPlay
-              />
-              <div className="absolute bottom-2 left-2 bg-black bg-opacity-50 text-white px-2 py-1 rounded text-sm">
-                {player.name || `Player ${player.id.slice(0, 5)}`}
-              </div>
+            // <div
+            //   key={player.id}
+            //   className="relative bg-gray-900 rounded-lg overflow-hidden aspect-video"
+            // >
+            //   <video
+            //     ref={(el) => {
+            //       if (el) videoRefs.current[player.id] = el;
+            //     }}
+            //     autoPlay
+            //     playsInline
+            //     className="w-full h-full object-cover"
+            //   />
+            //   <audio
+            //     ref={(el) => {
+            //       if (el) audioRefs.current[player.id] = el;
+            //     }}
+            //     autoPlay
+            //   />
+            //   <div className="absolute bottom-2 left-2 bg-black bg-opacity-50 text-white px-2 py-1 rounded text-sm">
+            //     {player.name || `Player ${player.id.slice(0, 5)}`}
+            //   </div>
+            // </div>
+            <div key={player.id}
+              className="relative bg-gray-900 rounded-lg overflow-hidden aspect-video">
+                {player.name}
             </div>
           ))}
       </div>
