@@ -14,7 +14,6 @@ export default function AuthPage() {
   });
 
   const handleSubmit = async () => {
-    console.log(`${screen} request:`, formData);
     if(screen === 'signup'){
       const res = await signup(formData.username, formData.password);
       if(res == 1){

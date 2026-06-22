@@ -2,12 +2,13 @@ import store, { appDispatch } from "../redux/store";
 import { Message, receive } from "../redux/chatslice";
 
 import {
+  addGameElement,
   Player,
   setCurrentPosition,
   setError,
+  setGameElements,
   setSpaceDimensions,
 } from "../redux/gameslice";
-import { setCurrentUser, setMyId } from "../redux/authslice";
 import { addPlayer, setPlayer, setPlayers } from "../redux/playerslice";
 
 export const getStatusColor = (connectionStatus: any) => {
@@ -41,7 +42,7 @@ export const handleServerMessage = (message: any) => {
   message = JSON.parse(message.data);
   switch (message.type) {
     case "space-joined": {
-      const { spawn, users, myId } = message.payload;
+      const { spawn, users } = message.payload;
       appDispatch(setCurrentPosition(spawn));
       appDispatch(
         setSpaceDimensions({
@@ -50,13 +51,6 @@ export const handleServerMessage = (message: any) => {
         })
       );
       appDispatch(setPlayers([...users]));
-      appDispatch(setMyId(myId));
-      appDispatch(
-        setCurrentUser({
-          id: myId,
-          name: message.payload.users.find((u: any) => u.id == myId).name,
-        })
-      );
       break;
     }
     case "movement": {
@@ -110,52 +104,33 @@ export const handleServerMessage = (message: any) => {
     }
     case "already-in-space": {
       appDispatch(setError("You are already in the space"));
-      // setError("You are already in the space");
       break;
     }
-    case "mute": {
-      const { userId, isMuted } = message.payload;
-      const payload = players.map((p: Player) => {
-        if (p.id === userId) {
-          return { ...p, isMuted };
-        }
-        return p;
-      });
-      appDispatch(setPlayers(payload));
+    case "element-add-rejected": {
+      appDispatch(setError(message.payload.reason));
       break;
     }
-
-    case "unmute": {
-      const { userId, isMuted } = message.payload;
-      const payload = players.map((p: Player) => {
-        if (p.id === userId) {
-          return { ...p, isMuted };
-        }
-        return p;
-      });
-      appDispatch(setPlayers(payload));
+    case "element-added": { 
+      appDispatch(setError(''));
+      appDispatch(
+        setGameElements([
+          ...store.getState().game.elements,
+          {
+            element: store.getState().elements.elements.find((e: any) => e._id === message.payload.elementId)!,
+            x: message.payload.x,
+            y: message.payload.y,
+          },
+        ])
+      );
       break;
     }
-    case "deafen": {
-      const { userId, isDeafened } = message.payload;
-      const payload = players.map((p: Player) => {
-        if (p.id === userId) {
-          return { ...p, isDeafened };
-        }
-        return p;
-      });
-      appDispatch(setPlayers(payload));
-      break;
-    }
-    case "undeafen": {
-      const { userId, isDeafened } = message.payload;
-      const payload = players.map((p: Player) => {
-        if (p.id === userId) {
-          return { ...p, isDeafened };
-        }
-        return p;
-      });
-      appDispatch(setPlayers(payload));
+    case "element-added-self": {
+      appDispatch(setError(''));
+      appDispatch(addGameElement({
+        element: store.getState().elements.elements.find((e: any) => e._id === message.payload.elementId)!,
+        x: message.payload.x,
+        y: message.payload.y
+      }));
       break;
     }
   }

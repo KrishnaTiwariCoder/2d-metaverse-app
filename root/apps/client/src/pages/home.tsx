@@ -1,15 +1,15 @@
 import React, {  useState } from 'react';
 import styles from '../styles';
-import CreateMap from '../components/createmap';
+import CreateMap from '../components/home/createspace';
 import { Space } from '../redux/spaceSlice';
-import {Link} from "react-router-dom";
 import { useSelector } from 'react-redux';
+import SpaceCard from '../components/home/spacecard';
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const {spaces} = useSelector((state:any)=>state.spaces) || [];
-  const { currentUser :{ username} } = useSelector((state:any)=>state.auth);  
+  const { currentUser :{ username:name} } = useSelector((state:any)=>state.auth);  
 
   const [spaceForm, setSpaceForm] = useState({
     name: '',
@@ -41,9 +41,9 @@ export default function Home() {
           <span style={styles.brandName}>Metaverse</span>
         </div>
         <div style={styles.headerRight}>
-          <span style={styles.username}>{username}</span>
+          <span style={styles.username}>{name}</span>
           <div style={styles.avatar}>
-            {getInitials(username)}
+            {getInitials(name)}
           </div>
         </div>
       </header>
@@ -76,17 +76,7 @@ export default function Home() {
 
         <div style={styles.spacesGrid}>
           {filteredSpaces.map((space:Space) => (
-            <Link  key={space.id} to={`/spaces/${space.id}`}>
-            <div style={styles.spaceCard}>
-              <h3 style={styles.spaceTitle}>{space.name}</h3>
-              <div style={styles.spaceFooter}>
-                <div style={styles.memberCount}>
-                  <span style={styles.memberIcon}>{space.creator.username}</span>
-                  <span>{space.dimensions.x}x{space.dimensions.y}</span>
-                </div>
-              </div>
-            </div>
-            </Link>
+              <SpaceCard key={space.id} space={space}  />
           ))}
         </div>
       </main>

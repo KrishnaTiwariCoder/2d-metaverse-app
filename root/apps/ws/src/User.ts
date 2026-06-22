@@ -33,9 +33,6 @@ export class User {
     try {
       this.ws.on("message", async (data) => {
         const parsedData = JSON.parse(data.toString());
-        console.log("---------------");
-        // console.log(parsedData);
-        console.log("---------------");
 
         switch (parsedData.type) {
           case "join": {
@@ -268,106 +265,59 @@ export class User {
             );
             break;
           }
-          case "mute": {
-            if (this.userId !== parsedData.payload.userId) return;
-            this.isMuted = true;
-
-            RoomManager.getInstance().broadcast(
-              {
-                type: "mute",
+          case "element-added" : {
+            const { elementId, x, y } = parsedData.payload;
+            // check if no other elements is present at that same coordinate, if yes then reject the addition of the element, and also using the height and width of the element, check if the element is going out of bounds of the space, or any other element is not it that range if yes then reject the addition of the element
+            if (x < 0 || y < 0 || x > this.spaceWidth! || y > this.spaceHeight!) {
+              this.send({
+                type: "element-add-rejected",
                 payload: {
-                  userId: this.userId,
-                  isMuted: this.isMuted,
+                  reason: "Element is out of bounds",
                 },
-              },
-              this,
-              this.spaceId!
-            );
-            break;
-          }
-          case "unmute": {
-            this.isMuted = false;
-            RoomManager.getInstance().broadcast(
-              {
-                type: "unmute",
-                payload: {
-                  userId: this.userId,
-                  isMuted: this.isMuted,
-                },
-              },
-              this,
-              this.spaceId!
-            );
-            break;
-          }
-          case "deafen": {
-            this.isDeafened = true;
-            RoomManager.getInstance().broadcast(
-              {
-                type: "deafen",
-                payload: {
-                  userId: this.userId!,
-                  isDeafened: this.isDeafened!,
-                },
-              },
-              this,
-              this.spaceId!
-            );
-            break;
-          }
-          case "undeafen": {
-            this.isDeafened = false;
-            RoomManager.getInstance().broadcast(
-              {
-                type: "undeafen",
-                payload: {
-                  userId: this.userId,
-                  isDeafened: this.isDeafened,
-                },
-              },
-              this,
-              this.spaceId!
-            );
-            break;
-          }
-          case "relay-ice": {
-            const { userId, ice }: { ice: RTCIceCandidate; userId: string } =
-              parsedData.payload;
-
-            if (!userId || !ice) {
-              console.error("Invalid ICE candidate relay");
+              });
               return;
             }
+            // const otherElement = await space.findOne({
+            //   _id: this.spaceId,
+            //   "elements.x": { $gte: x - 50, $lte: x + 50 },
+            //   "elements.y": { $gte: y - 50, $lte: y + 50 }
+            // });
+            const otherElement = false;
+            if (otherElement) {
+              this.send({
+                type: "element-add-rejected",
+                payload: {
+                  reason: "Element is overlapping with another element",
+                },
+              });
+              return;
+            } 
 
-            RoomManager.getInstance()
-              .rooms.get(this.spaceId!)
-              ?.find((user: User) => user.userId === userId)
-              ?.ws.send(
-                JSON.stringify({
-                  type: "ice",
-                  payload: {
-                    ice,
-                    userId: this.userId,
-                  },
-                })
-              );
-            break;
-          }
-          case "relay-sdp": {
-            const { userId, sdp } = parsedData.payload;
 
-            RoomManager.getInstance()
-              .rooms.get(this.spaceId!)
-              ?.find((user: User) => user.userId === userId)
-              ?.ws.send(
-                JSON.stringify({
-                  type: "sdp",
-                  payload: {
-                    sdp,
-                    userId: this.userId,
-                  },
-                })
-              );
+            // If it can be added, broadcast the element-added message to all users in the room
+
+            RoomManager.getInstance().broadcast(
+              {
+                type: "element-added",
+                payload: {
+                  elementId,
+                  x,  
+                  y
+                },
+              },
+              this, 
+              this.spaceId!
+            );
+            // send to himself too the same message so that he can add the element to his own state
+
+            this.send({
+              type: "element-added-self",  
+              payload: {
+                elementId,
+                x,  
+                y
+              },
+            });
             break;
           }
         }

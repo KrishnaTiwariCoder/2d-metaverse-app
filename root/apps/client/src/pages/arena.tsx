@@ -6,19 +6,20 @@ import {
 } from "../utils/arena";
 import { WS_URL } from "../utils/urls";
 
-import Canvas from "../components/canvas";
-import ChatRoom from "../components/chatbox";
-import VoiceSection from "../components/voicesection";
+import Canvas from "../components/arena/canvas";
+import ChatRoom from "../components/arena/chatbox";
+import VoiceSection from "../components/arena/voicesection";
 
 import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
 
 import { useParams } from "react-router-dom";
 
-import { logOut } from "../redux/authslice";
 import { Player } from "../redux/playerslice";
 import { Space } from "../redux/spaceSlice";
-import { setConnectionStatus, setError, setSpaceDimensions, setSpaceId } from "../redux/gameslice";
+import { setConnectionStatus, setError, setGameElements, setSpaceDimensions, setSpaceId } from "../redux/gameslice";
+import ElementBox from "../components/arena/elementbox";
+import { findSpaceById } from "../utils/spaces";
 
 const Arena = () => {
   const {id : spaceId} = useParams();
@@ -26,6 +27,7 @@ const Arena = () => {
   const { myId ,token } = useSelector((state: any) => state.auth);
   const canvasRef = useRef<any>(null);
   const { connectionStatus } = useSelector((state: any) => state.game);
+  const gameElements = useSelector((state: any) => state.game.elements);
   const { players } = useSelector((state: any) => state.players);
   const localWsRef = useRef<WebSocket | null>(null);
 
@@ -77,7 +79,6 @@ const Arena = () => {
 
     return () => {
       if (localWsRef.current) {
-        console.log("yes ws closed");
         if (localWsRef.current.readyState === WebSocket.OPEN || localWsRef.current.readyState === WebSocket.CONNECTING) {
           localWsRef.current.close();
           if (!localWsRef.current) {
@@ -88,37 +89,109 @@ const Arena = () => {
     };
   }, []);
 
-  useEffect(() => {
+
+
+
+
+
+
+  const imageCache: Record<string, HTMLImageElement> = {};
+
+function loadImage(url: string): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+
+    img.crossOrigin = "anonymous";
+    img.src = url;
+  });
+}
+
+async function preloadImages(gameElements: any[]) {
+  const uniqueUrls = [
+    ...new Set(
+      gameElements.map((item) => item.element.imageUrl)
+    ),
+  ];
+
+  await Promise.all(
+    uniqueUrls.map(async (url) => {
+      imageCache[url] = await loadImage(url);
+    })
+  );
+
+  return imageCache;
+}
+
+function drawGameElements(
+  ctx: CanvasRenderingContext2D,
+  gameElements: any[]
+) {
+  gameElements.forEach((item) => {
+    const { x, y, element } = item;
+
+    const img = imageCache[element.imageUrl];
+
+    if (img) {
+      ctx.drawImage(img, x, y, 50, 50);
+    }
+  });
+}
+
+useEffect(() => {
+  const canvas = canvasRef.current;
+  if (!canvas) return;
+
+  const ctx = canvas.getContext("2d");
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  players.forEach((player: any) => {
+    const { x, y, id } = player;
+
+    ctx.beginPath();
+    ctx.arc(x, y, 20, 0, Math.PI * 2);
+    ctx.fillStyle =
+      id == myId ? "#4f46e5" : "#64748b";
+    ctx.fill();
+    ctx.closePath();
+  });
+
+  async function init() {
+    await preloadImages(gameElements);
+
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    const ctx = canvas?.getContext("2d");
 
-    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
 
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawGameElements(ctx, gameElements);
+  }
 
-    players.forEach((player: any) => {
-      const { x, y, id } = player;
+  init();
 
-      ctx.beginPath();
-      ctx.arc(x, y, 20, 0, Math.PI * 2);
-      ctx.fillStyle =
-        id == myId ? "#4f46e5" : "#64748b";
-      ctx.fill();
-      ctx.closePath();
-    });
-  }, [players, myId]);
+  }, [players, myId, gameElements]);
 
+  const space: Space | undefined = spaces.find((s: Space) => s.id === spaceId);
   
-  const logOutBtn = () => {
-    dispatch(logOut());
-  };
-
-  const space = spaces.find((space:Space)=>space.id == spaceId);
   useEffect(() => { 
-
-    if(!spaceId || !space) return;
-    dispatch(setSpaceId(spaceId));
-    dispatch(setSpaceDimensions({width : space.dimensions.x , height : space.dimensions.y}));
+  
+    findSpaceById(spaceId!).then((spaceData:any)=>{
+      if(spaceData){
+        const elementsWithData = spaceData.elements.map((el:any)=>{
+          return {
+            element: el.id,
+            x: el.x,
+            y: el.y
+          }
+        })
+        dispatch(setGameElements(elementsWithData));
+        dispatch(setSpaceId(spaceId!));
+        dispatch(setSpaceDimensions({width : spaceData.width, height : spaceData.height}));
+      }
+    });
   },[spaceId, spaces])
   
   if (!space || !spaceId) {
@@ -135,24 +208,31 @@ const Arena = () => {
         <div className={`mb-2 ${getStatusColor(connectionStatus)}`}>
           Status: {connectionStatus}
         </div>
-        <button onClick={logOutBtn}>Reset</button>
         <div>{players.find((p: Player) => p.id === myId)?.name}</div>
       </div>
       <div className="flex-1 bg-gray-800 rounded-lg border border-gray-700">
         <div className="flex items-center justify-center w-full h-full min-h-[400px] p-4">
-          <Canvas canvasRef={canvasRef} wsRef={localWsRef} />
-          <div>
+
+          <div className="flex flex-col md:flex-row w-full h-full gap-4">
+          <Canvas canvasRef={canvasRef} wsRef={localWsRef}/>
+          </div>
+          
+          <div className="flex-1 p-4">
             <ChatRoom wsRef={localWsRef} />
           </div>
+
+          <div className=" bottom-2 right-2 flex gap-2">
+          {
+            // if space is owned by the user then show the element box
+            space.creator._id === myId && (
+              <ElementBox wsRef={localWsRef} /> )
+
+          }
+          </div>
+
         </div>
       </div>
 
-      <div className="bg-gray-800 rounded-lg border border-gray-700 p-4 flex flex-col gap-2"></div>
-      <div className="bg-gray-800 rounded-lg border border-gray-700 p-4">
-        <span className="text-sm text-gray-400">
-          permissionAndCreatorInfoArea
-        </span>
-      </div>
     </div>
   );
 };

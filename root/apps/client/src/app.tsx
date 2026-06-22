@@ -10,23 +10,24 @@ import { getAllSpacesAndMaps } from "./utils/spaces";
 import { logOut, setCurrentUser, setMyId, storeToken } from "./redux/authslice";
 import { setMaps, setSpacesState } from "./redux/spaceSlice";
 import PrivateRoute from "./components/privateroute";
+import { setElements } from "./redux/elementSlice";
 
 function App() {
   
-
   const dispatch = useDispatch();
   const token = useSelector((state:any)=>state.auth.token);
   useEffect(()=>{
     const fetchUser = async () => {
         const {data:{user:res} , status} = await getMe();
-        const {spaces,maps}:{spaces:any[],maps:any[]} = await getAllSpacesAndMaps() as {spaces:any[],maps:any[]};
+        const {spaces,maps , elements}:{spaces:any[],maps:any[] , elements:any[]} = await getAllSpacesAndMaps() as {spaces:any[],maps:any[] , elements:any[]};
         
         if(status==200){
             dispatch(setCurrentUser({id: res._id, username: res.username}));
             dispatch(setMyId(res._id));
             dispatch(storeToken(localStorage.getItem("token")));
             dispatch(setSpacesState(spaces));
-            dispatch(setMaps(maps))
+            dispatch(setMaps(maps));
+            dispatch(setElements(elements));
         } else {
           dispatch(logOut())
         }
@@ -35,6 +36,7 @@ function App() {
       fetchUser();
     }
   },[token])
+
   return (
     <>
       <Routes>

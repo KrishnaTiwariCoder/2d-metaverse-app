@@ -17,6 +17,12 @@ spaceRouter.post("/", async (req, res) => {
   }
 
   try {
+    const existingSpace = await space.findOne({ createdBy: req.user._id });
+    if (existingSpace) {
+      res.status(400).json({ error: "Only 1 space is allowed per user" });
+      return;
+    }
+
     if (!mapId) {
       const newSpace = await space.create({
         name,
@@ -51,7 +57,7 @@ spaceRouter.post("/", async (req, res) => {
   }
 });
 
-spaceRouter.delete("/delete/", async (req, res) => {
+spaceRouter.delete("/", async (req, res) => {
   const { spaceId } = req.body;
   if (!spaceId) {
     res.status(400).json({ error: "Missing space ID" });
@@ -63,7 +69,7 @@ spaceRouter.delete("/delete/", async (req, res) => {
       createdBy: req.user._id,
     });
     if (!spaceFound) {
-      res.status(400).json({ error: "Space not found" });
+      res.status(400).json({ error: "Space not found, or not the owner" });
       return;
     }
 
@@ -91,7 +97,8 @@ spaceRouter.get("/all", async (req, res) => {
       creator: spaceE.createdBy,
     }));
     const maps = await map.find();
-    res.status(200).json({ spaces: response , maps});
+    const elements = await element.find();
+    res.status(200).json({ spaces: response , maps, elements});
   } catch (err) {
     res.status(500).json({ error: "Internal server error", message: err });
     return;
@@ -102,7 +109,7 @@ spaceRouter.get("/:spaceId", async (req, res) => {
   try {
     const spaceFound = await space
       .findById(req.params.spaceId)
-      .populate("elements.id createdBy", "username");
+      .populate("elements.id");  
     if (!spaceFound) {
       res.status(400).json({ error: "Space not found" });
       return;
@@ -137,6 +144,7 @@ spaceRouter.post("/element", async (req, res) => {
       res.status(400).json({ error: "Space not found" });
       return;
     }
+    console.log(spaceFound , req.user)
     if (spaceFound!.createdBy!.toString() !== req.user._id.toString()) {
       res.status(401).json({ error: "Unauthorized" });
       return;
@@ -145,12 +153,12 @@ spaceRouter.post("/element", async (req, res) => {
       res.status(400).json({ error: "Invalid coordinates" });
       return;
     }
-
-    spaceFound.elements.push({ id: elementId, x, y });
+    console.log(elementId, spaceId, x, y);
+    spaceFound.elements.push({ id:elementId , x, y });
 
     await spaceFound.save();
 
-    res.status(200).json({ message: "Element added to space successfully" });
+    res.status(200).json({ message: "Element added to space successfully" , element: elementFound });
   } catch (error) {
     res.status(500).json({ error: "Internal server error", message: error });
     return;
@@ -179,7 +187,7 @@ spaceRouter.delete("/element", async (req, res) => {
         (element) =>
           element.x === x &&
           element.y === y &&
-          element.id.toString() == elementId.toString()
+          element._id.toString() == elementId.toString()
       )
     ) {
       res.status(400).json({ error: "Element not found" });

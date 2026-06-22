@@ -26,6 +26,11 @@ exports.spaceRouter.post("/", (req, res) => __awaiter(void 0, void 0, void 0, fu
         return;
     }
     try {
+        const existingSpace = yield database_1.space.findOne({ createdBy: req.user._id });
+        if (existingSpace) {
+            res.status(400).json({ error: "Only 1 space is allowed per user" });
+            return;
+        }
         if (!mapId) {
             const newSpace = yield database_1.space.create({
                 name,
@@ -60,7 +65,7 @@ exports.spaceRouter.post("/", (req, res) => __awaiter(void 0, void 0, void 0, fu
         return;
     }
 }));
-exports.spaceRouter.delete("/delete/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+exports.spaceRouter.delete("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { spaceId } = req.body;
     if (!spaceId) {
         res.status(400).json({ error: "Missing space ID" });
@@ -72,7 +77,7 @@ exports.spaceRouter.delete("/delete/", (req, res) => __awaiter(void 0, void 0, v
             createdBy: req.user._id,
         });
         if (!spaceFound) {
-            res.status(400).json({ error: "Space not found" });
+            res.status(400).json({ error: "Space not found, or not the owner" });
             return;
         }
         res.status(200).json({ message: "Space deleted successfully" });
@@ -98,7 +103,8 @@ exports.spaceRouter.get("/all", (req, res) => __awaiter(void 0, void 0, void 0, 
             creator: spaceE.createdBy,
         }));
         const maps = yield database_1.map.find();
-        res.status(200).json({ spaces: response, maps });
+        const elements = yield database_1.element.find();
+        res.status(200).json({ spaces: response, maps, elements });
     }
     catch (err) {
         res.status(500).json({ error: "Internal server error", message: err });
@@ -109,7 +115,7 @@ exports.spaceRouter.get("/:spaceId", (req, res) => __awaiter(void 0, void 0, voi
     try {
         const spaceFound = yield database_1.space
             .findById(req.params.spaceId)
-            .populate("elements.id createdBy", "username");
+            .populate("elements.id");
         if (!spaceFound) {
             res.status(400).json({ error: "Space not found" });
             return;
@@ -143,6 +149,7 @@ exports.spaceRouter.post("/element", (req, res) => __awaiter(void 0, void 0, voi
             res.status(400).json({ error: "Space not found" });
             return;
         }
+        console.log(spaceFound, req.user);
         if (spaceFound.createdBy.toString() !== req.user._id.toString()) {
             res.status(401).json({ error: "Unauthorized" });
             return;
@@ -151,9 +158,10 @@ exports.spaceRouter.post("/element", (req, res) => __awaiter(void 0, void 0, voi
             res.status(400).json({ error: "Invalid coordinates" });
             return;
         }
+        console.log(elementId, spaceId, x, y);
         spaceFound.elements.push({ id: elementId, x, y });
         yield spaceFound.save();
-        res.status(200).json({ message: "Element added to space successfully" });
+        res.status(200).json({ message: "Element added to space successfully", element: elementFound });
     }
     catch (error) {
         res.status(500).json({ error: "Internal server error", message: error });
@@ -178,7 +186,7 @@ exports.spaceRouter.delete("/element", (req, res) => __awaiter(void 0, void 0, v
         }
         if (!spaceFound.elements.find((element) => element.x === x &&
             element.y === y &&
-            element.id.toString() == elementId.toString())) {
+            element._id.toString() == elementId.toString())) {
             res.status(400).json({ error: "Element not found" });
             return;
         }

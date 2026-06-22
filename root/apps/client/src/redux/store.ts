@@ -3,7 +3,8 @@ import chatReducer from "./chatslice"; // Import your slice reducer
 import authReducer from "./authslice";
 import gameReducer from "./gameslice";
 import playerReducer from "./playerslice";
-import spaceReducer from "./spaceSlice"
+import spaceReducer from "./spaceSlice";
+import elementReducer from "./elementSlice";
 // Create and export the store
 export const store = configureStore({
   reducer: {
@@ -12,6 +13,7 @@ export const store = configureStore({
     auth: authReducer,
     spaces:spaceReducer,
     players: playerReducer,
+    elements:elementReducer
   },
 });
 

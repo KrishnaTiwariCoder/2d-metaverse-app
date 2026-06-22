@@ -40,7 +40,7 @@ const spaceSlice = createSlice({
       state.spaces = [...action.payload] ;
     },
     removeSpace :(state , action :PayloadAction<string>) =>{
-        state.spaces = state.spaces.filter(space => space.id ! = action.payload)
+        state.spaces = state.spaces.filter(space => space.id != action.payload)
     },
     setMaps:(state, action:PayloadAction<any>)=>{
       state.maps = action.payload;

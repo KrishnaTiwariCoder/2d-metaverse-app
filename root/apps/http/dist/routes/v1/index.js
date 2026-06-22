@@ -14,15 +14,10 @@ const authenticate_1 = require("../../middlewares/authenticate");
 const router = express_1.default.Router();
 router.use("/", auth_1.authRouter);
 router.use("/user", authenticate_1.authenticate, authenticate_1.accountExists, user_1.userRouter);
-// router.use("/user", userRouter);
 router.use("/avatars", authenticate_1.authenticate, authenticate_1.accountExists, avatar_1.avatarRouter);
-// router.use("/avatars", avatarRouter);
 router.use("/space", authenticate_1.authenticate, authenticate_1.accountExists, space_1.spaceRouter);
-// router.use("/space", spaceRouter);
 router.use("/elements", authenticate_1.authenticate, authenticate_1.accountExists, elements_1.elementRouter);
-// router.use("/elements", elementRouter);
 router.use("/admin", authenticate_1.authenticate, authenticate_1.isAdmin, authenticate_1.accountExists, admin_1.adminRouter);
-// router.use("/admin", adminRouter);
 router.get("/", (req, res) => {
     res.json({ message: "Entrypoint" });
 });
