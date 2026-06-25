@@ -20,7 +20,7 @@ import { useSelector } from "react-redux";
           .map((player: Player) => (
             <div key={player.id}
               className="relative bg-gray-900 rounded-lg overflow-hidden aspect-video">
-                {player.name}
+                {player.username}
             </div>
           ))}
       </div>

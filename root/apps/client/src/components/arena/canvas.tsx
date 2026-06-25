@@ -18,7 +18,7 @@ const Canvas = ({ canvasRef, wsRef }: any) => {
 
       let newX = currentPosition.x;
       let newY = currentPosition.y;
-      const step = 10;
+      const step = 15;
 
       switch (e.key) {
         case "ArrowUp":

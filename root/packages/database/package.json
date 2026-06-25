@@ -1,7 +1,7 @@
 {
   "name": "@repo/database",
   "version": "1.0.0",
-  "main": "dist/index.ts",
+  "main": "dist/index.j s",
   "types": "dist/index.d.ts",
   "type": "commonjs",
   "scripts": {

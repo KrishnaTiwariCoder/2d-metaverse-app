@@ -1,11 +1,23 @@
 import { WebSocket } from "ws";
 import { RoomManager } from "./RoomManager";
 import { OutGoingMessage } from "./types";
-import { space, user } from "@repo/database";
-import jwt, { JwtPayload } from "jsonwebtoken";
-import { JWT_SECRET } from "./config";
+import { space, element } from "@repo/database";
+
 function getRandomId() {
   return Math.random().toString(36).substring(2, 15);
+}
+
+
+const PLAYER_RADIUS = 7.5;
+const PLAYER_BOX_SIZE = PLAYER_RADIUS * 2; 
+
+function playerAABB(centerX: number, centerY: number) {
+  return {
+    x: centerX - PLAYER_RADIUS,
+    y: centerY - PLAYER_RADIUS,
+    width: PLAYER_BOX_SIZE,
+    height: PLAYER_BOX_SIZE,
+  };
 }
 
 export class User {
@@ -18,17 +30,18 @@ export class User {
   private ws: WebSocket;
   private spaceWidth?: number;
   private spaceHeight?: number;
-  private isSpeaking?: boolean;
-  private isMuted?: boolean;
-  private isDeafened?: boolean;
 
-  constructor(ws: WebSocket) {
+  constructor(ws: WebSocket , user:any) {
     this.id = getRandomId();
     this.x = 0;
     this.y = 0;
     this.ws = ws;
+    this.userId = user._id;
+    this.name = user.username;
     this.initHandlers();
+
   }
+
   initHandlers() {
     try {
       this.ws.on("message", async (data) => {
@@ -36,73 +49,68 @@ export class User {
 
         switch (parsedData.type) {
           case "join": {
-            const { spaceId, token } = parsedData.payload;
-            const { _id: userId, username: name } = jwt.verify(
-              token,
-              process.env.JWT_SECRET || JWT_SECRET
-            ) as JwtPayload;
-
-            if (!userId) {
-              console.log("because of 1");
-              this.ws.close();
-              return;
-            }
-
-            const userFound = await user.findById(userId);
-            if (!userFound) {
-              console.log("because of 2");
-              this.ws.close();
-              return;
-            }
-            this.userId = userId;
-            this.name = name;
-
-            const spaceFound = (await space.findById(spaceId)) || {
-              width: 500,
-              height: 500,
-            };
+            const { spaceId } = parsedData.payload;
+          
+            const spaceFound = (await space.findById(spaceId).populate("elements.id"));
 
             if (!spaceFound) {
-              console.log("because of 3");
               this.ws.close();
               return;
             }
 
             this.spaceId = spaceId;
-            const spaceMembers = RoomManager.getInstance().rooms.get(spaceId);
-            let spawnX: number = Math.floor(Math.random() * spaceFound.width),
-              spawnY: number = Math.floor(Math.random() * spaceFound.height);
-
-            // this code ensures that if the user already is in the space, they spawn at the position they were in
-
-            // this code ensures that the user doesn't spawn on top of another user
-            let userExistAtThatCoordinate = spaceMembers?.find(
-              (u) =>
-                Math.abs(u.x - spawnX) <= 50 &&
-                Math.abs(u.y - spawnY) <= 50 &&
-                u.userId !== this.userId
-            );
-
-            while (userExistAtThatCoordinate) {
-              spawnX = Math.floor(Math.random() * spaceFound.width);
-              spawnY = Math.floor(Math.random() * spaceFound.height);
-              userExistAtThatCoordinate = spaceMembers?.find(
-                (u) =>
-                  Math.abs(u.x - spawnX) <= 50 &&
-                  Math.abs(u.y - spawnY) <= 50 &&
-                  u.userId !== this.userId
-              );
-            }
-
             this.spaceWidth = spaceFound.width;
             this.spaceHeight = spaceFound.height;
+
+            const grid = RoomManager.getInstance().getGrid(spaceId);
+
+            const isFirstUserInRoom =
+              !RoomManager.getInstance().rooms.has(spaceId) ||
+              RoomManager.getInstance().rooms.get(spaceId)?.length === 0;
+
+            if (isFirstUserInRoom && spaceFound.elements?.length) {
+              for (const placed of spaceFound.elements) {
+                grid.addElement(
+                  placed.id._id.toString(),
+                  placed.x! ,
+                  placed.y!,
+                  placed.id.width!,
+                  placed.id.height!,
+                  placed.id.statics!,
+                  placed._id.toString()  
+                );
+              }
+            }
+
+            let spawnX: number = Math.floor(Math.random() * this.spaceWidth!),
+              spawnY: number = Math.floor(Math.random() * this.spaceHeight!);
+
+            function spawnIsBlocked(x: number, y: number, userId: string) {
+              if (grid.hasUserCollision(x, y, userId)) return true;
+              const box = playerAABB(x, y);
+              if (grid.hasElementCollision(box.x, box.y, box.width, box.height))
+                return true;
+              return false;
+            }
+
+            let attempts = 0;
+            while (spawnIsBlocked(spawnX, spawnY , this.userId!) && attempts < 1000) {
+              spawnX = Math.floor(Math.random() * this.spaceWidth!);
+              spawnY = Math.floor(Math.random() * this.spaceHeight!);
+              attempts++;
+            }
+
+            if (attempts >= 1000) {
+              console.log("because of 5: could not find free spawn point");
+              this.ws.close();
+              return;
+            }
+
             this.x = spawnX;
             this.y = spawnY;
-            this.isSpeaking = false;
-            this.isMuted = false;
-            this.isDeafened = false;
 
             RoomManager.getInstance().addUser(spaceId, this);
+            grid.addUser(this.userId!, this.x, this.y);
 
             this.send({
               type: "space-joined",
@@ -119,10 +127,7 @@ export class User {
                       id: u.userId,
                       x: u.x,
                       y: u.y,
-                      name: u.name,
-                      isSpeaking: u.isSpeaking,
-                      isMuted: u.isMuted,
-                      isDeafened: u.isDeafened,
+                      username: u.name,
                     })) ?? [],
                 width: this.spaceWidth,
                 height: this.spaceHeight,
@@ -136,38 +141,13 @@ export class User {
                   userId: this.userId,
                   x: this.x,
                   y: this.y,
-                  name: this.name,
+                  username: this.name,
                 },
               },
               this,
               this.spaceId!
             );
-            // tell everyone in the room that im going to share you my stream
-            RoomManager.getInstance().broadcast(
-              {
-                type: "add-peer",
-                payload: {
-                  userId: this.userId,
-                  createOffer: false,
-                  user: this,
-                },
-              },
-              this,
-              this.spaceId!
-            );
-            RoomManager.getInstance()
-              .rooms.get(this.spaceId!)
-              ?.filter((client) => client.userId !== this.userId)
-              ?.forEach((client: User) => {
-                this.send({
-                  type: "add-peer",
-                  payload: {
-                    userId: client.userId,
-                    createOffer: true,
-                    user: client,
-                  },
-                });
-              });
+            
             break;
           }
           case "move": {
@@ -175,7 +155,6 @@ export class User {
             const xDisplacement = Math.abs(MoveX - this.x);
             const yDisplacement = Math.abs(MoveY - this.y);
             if (MoveX < 0 || MoveY < 0) {
-              // console.log("rejected cause of negative displacement");
               this.send({
                 type: "movement-rejected",
                 payload: {
@@ -186,12 +165,10 @@ export class User {
               return;
             }
             if (
-              (xDisplacement === 10 && yDisplacement === 0) ||
-              (xDisplacement === 0 && yDisplacement === 10)
+              (xDisplacement === 15 && yDisplacement === 0) ||
+              (xDisplacement === 0 && yDisplacement === 15)
             ) {
-              //reject movement if the x and y are more than the width and height of the space
               if (MoveX > this.spaceWidth! || MoveY > this.spaceHeight!) {
-                // console.log("rejected cause of space width and height");
                 this.send({
                   type: "movement-rejected",
                   payload: {
@@ -201,17 +178,10 @@ export class User {
                 });
                 return;
               }
-              // reject movement if some other user is already there at the x and y
-              const otherUser = RoomManager.getInstance()
-                .rooms.get(this.spaceId!)
-                ?.find(
-                  (u) =>
-                    Math.abs(u.x - MoveX) <= 50 &&
-                    Math.abs(u.y - MoveY) <= 50 &&
-                    u.userId !== this.userId
-                );
-              if (otherUser) {
-                // console.log("rejected cause of other user");
+
+              const grid = RoomManager.getInstance().getGrid(this.spaceId!);
+
+              if (grid.hasUserCollision(MoveX, MoveY, this.userId!)) {
                 this.send({
                   type: "movement-rejected",
                   payload: {
@@ -221,6 +191,27 @@ export class User {
                 });
                 return;
               }
+              
+              const playerBox = playerAABB(MoveX, MoveY);
+              if (
+                grid.hasElementCollision(
+                  playerBox.x,
+                  playerBox.y,
+                  playerBox.width,
+                  playerBox.height
+                )
+              ) {
+                this.send({
+                  type: "movement-rejected",
+                  payload: {
+                    x: this.x,
+                    y: this.y,
+                  },
+                });
+                return;
+              }
+
+              grid.moveUser(this.userId!, MoveX, MoveY);
               this.x = MoveX;
               this.y = MoveY;
               RoomManager.getInstance().broadcast(
@@ -237,7 +228,6 @@ export class User {
               );
               return;
             } else {
-              // console.log("rejected cause of displacement");
               this.send({
                 type: "movement-rejected",
                 payload: {
@@ -265,58 +255,67 @@ export class User {
             );
             break;
           }
-          case "element-added" : {
+          case "element-added": {
             const { elementId, x, y } = parsedData.payload;
-            // check if no other elements is present at that same coordinate, if yes then reject the addition of the element, and also using the height and width of the element, check if the element is going out of bounds of the space, or any other element is not it that range if yes then reject the addition of the element
+
             if (x < 0 || y < 0 || x > this.spaceWidth! || y > this.spaceHeight!) {
               this.send({
                 type: "element-add-rejected",
-                payload: {
-                  reason: "Element is out of bounds",
-                },
+                payload: { reason: "Element is out of bounds" },
               });
               return;
             }
-            // const otherElement = await space.findOne({
-            //   _id: this.spaceId,
-            //   "elements.x": { $gte: x - 50, $lte: x + 50 },
-            //   "elements.y": { $gte: y - 50, $lte: y + 50 }
-            // });
-            const otherElement = false;
-            if (otherElement) {
+
+            const template = await element.findById(elementId);
+            if (!template) {
               this.send({
                 type: "element-add-rejected",
-                payload: {
-                  reason: "Element is overlapping with another element",
-                },
+                payload: { reason: "Unknown element type" },
               });
               return;
-            } 
+            }
 
+            if (x + template.width > this.spaceWidth! || y + template.height > this.spaceHeight!) {
+              this.send({
+                type: "element-add-rejected",
+                payload: { reason: "Element is out of bounds" },
+              });
+              return;
+            }
 
-            // If it can be added, broadcast the element-added message to all users in the room
+            const grid = RoomManager.getInstance().getGrid(this.spaceId!);
+            
+
+            if (grid.hasElementCollision(x, y, template.width, template.height)) {
+              this.send({
+                type: "element-add-rejected",
+                payload: { reason: "Element is overlapping with another element" },
+              });
+              return;
+            }
+
+          
+            const instanceId = getRandomId();
+            const statics = template.statics ?? true;
+
+            grid.addElement(instanceId, x, y, template.width, template.height, statics , elementId);
+
+            await space.findByIdAndUpdate(this.spaceId, {
+              $push: { elements: { id: elementId, x, y, statics } },
+            });
 
             RoomManager.getInstance().broadcast(
               {
                 type: "element-added",
-                payload: {
-                  elementId,
-                  x,  
-                  y
-                },
+                payload: { elementId, instanceId, x, y },
               },
-              this, 
+              this,
               this.spaceId!
             );
-            // send to himself too the same message so that he can add the element to his own state
 
             this.send({
-              type: "element-added-self",  
-              payload: {
-                elementId,
-                x,  
-                y
-              },
+              type: "element-added-self",
+              payload: { elementId, instanceId, x, y },
             });
             break;
           }
@@ -334,8 +333,10 @@ export class User {
       this,
       this.spaceId!
     );
+    RoomManager.getInstance().getGrid(this.spaceId!).removeUser(this.userId!);
     RoomManager.getInstance().removeUser(this.spaceId!, this);
   }
+
   send(message: OutGoingMessage) {
     this.ws.send(JSON.stringify(message));
   }

@@ -24,7 +24,7 @@ import { findSpaceById } from "../utils/spaces";
 const Arena = () => {
   const {id : spaceId} = useParams();
   const {spaces} = useSelector((state:any)=>state.spaces)
-  const { myId ,token } = useSelector((state: any) => state.auth);
+  const { myId } = useSelector((state: any) => state.auth);
   const canvasRef = useRef<any>(null);
   const { connectionStatus } = useSelector((state: any) => state.game);
   const gameElements = useSelector((state: any) => state.game.elements);
@@ -46,8 +46,7 @@ const Arena = () => {
           JSON.stringify({
             type: "join",
             payload: {
-              spaceId,
-              token,
+              spaceId
             },
           })
         );
@@ -88,13 +87,7 @@ const Arena = () => {
       }
     };
   }, []);
-
-
-
-
-
-
-
+  
   const imageCache: Record<string, HTMLImageElement> = {};
 
 function loadImage(url: string): Promise<HTMLImageElement> {
@@ -135,7 +128,7 @@ function drawGameElements(
     const img = imageCache[element.imageUrl];
 
     if (img) {
-      ctx.drawImage(img, x, y, 50, 50);
+      ctx.drawImage(img, x, y, element.width, element.height);
     }
   });
 }
@@ -152,7 +145,7 @@ useEffect(() => {
     const { x, y, id } = player;
 
     ctx.beginPath();
-    ctx.arc(x, y, 20, 0, Math.PI * 2);
+    ctx.arc(x, y, 7.5, 0, Math.PI * 2);
     ctx.fillStyle =
       id == myId ? "#4f46e5" : "#64748b";
     ctx.fill();

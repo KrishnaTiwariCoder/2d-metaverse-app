@@ -4,11 +4,7 @@ export interface Player {
   id: string;
   x: number; // spawn.x
   y: number; // spawn.y
-  isMuted: boolean;
-  isDeafened: boolean;
-  isSpeaking: boolean;
-  name: string;
-  connection?: RTCPeerConnection;
+  username: string;
 }
 
 // Define the type for state

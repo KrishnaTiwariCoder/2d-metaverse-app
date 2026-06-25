@@ -2,7 +2,7 @@ import { user } from "@repo/database";
 import { Router } from "express";
 import bcrypt from "bcrypt";
 import { loginSchema, signupSchema } from "../../types";
-import { generateLoginToken, verifyToken } from "../../services";
+import { generateLoginToken, verifyToken } from "@repo/auth";
 
 export const authRouter = Router();
 

@@ -11,7 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.accountExists = exports.isAdmin = exports.authenticate = void 0;
 const database_1 = require("@repo/database");
-const services_1 = require("../services");
+const auth_1 = require("@repo/auth");
 // Middleware for authentication
 const authenticate = (req, res, next) => {
     // Get the Authorization header
@@ -27,7 +27,7 @@ const authenticate = (req, res, next) => {
         return;
     }
     // Verify the token
-    const decoded = (0, services_1.verifyToken)(token);
+    const decoded = (0, auth_1.verifyToken)(token);
     if (!decoded) {
         res.status(403).json({ error: "Token is invalid or expired" });
         return;

@@ -13,6 +13,8 @@
   "description": "",
   "dependencies": {
     "@repo/database": "*",
+    "@repo/grid": "*",
+    "@repo/auth": "*",
     "@types/cors": "^2.8.17",
     "@types/dotenv": "^6.1.1",
     "@types/express": "^5.0.0",

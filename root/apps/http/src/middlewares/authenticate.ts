@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { user } from "@repo/database";
-import { verifyToken } from "../services";
+import {verifyToken} from "@repo/auth";
 // Middleware for authentication
 export const authenticate = (
   req: Request,

@@ -121,7 +121,7 @@ feat: WebSocket server with space-scoped connections
 ```
 
 - [ ] Attach `ws` server to Express via `server.on('upgrade', ...)`
-- [~] On connect: validate JWT from query param; resolve and check space access
+- [x] On connect: validate JWT from query param; resolve and check space access
 - [x] Maintain in-memory map: `spaceId → Set<ConnectedClient>`
 - [x] On join: send `space:init` (map info + all placements + all current user positions) to new client
 - [x] Broadcast `user:joined` to rest of space
@@ -136,12 +136,12 @@ feat: WebSocket server with space-scoped connections
 feat: authoritative server-side avatar movement with collision
 ```
 
-- [~] On space load, build in-memory collision grid from map's `collisionGrid` + all static placements
+- [x] On space load, build in-memory collision grid from map's `collisionGrid` + all static placements
 - [x] Handle `move { direction }` from client
-- [~] Validate move against collision grid; reject if blocked
-- [~] Update player position in server-side space state
+- [x] Validate move against collision grid; reject if blocked
+- [x] Update player position in server-side space state
 - [x] Broadcast `user:moved { userId, x, y }` to all clients in space
-- [ ] Invalidate and rebuild collision grid segment when a placement changes (v0.7.0 feeds this)
+- [x] Invalidate and rebuild collision grid segment when a placement changes (v0.7.0 feeds this)
 
 ---
 

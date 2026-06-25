@@ -73,10 +73,7 @@ export const handleServerMessage = (message: any) => {
         id: message.payload.userId,
         x: message.payload.x,
         y: message.payload.y,
-        isMuted: false,
-        isDeafened: false,
-        isSpeaking: false,
-        name: message.payload.name,
+        username : message.payload.username,
       };
       appDispatch(addPlayer(payload));
       break;

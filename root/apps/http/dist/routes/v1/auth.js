@@ -17,7 +17,7 @@ const database_1 = require("@repo/database");
 const express_1 = require("express");
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const types_1 = require("../../types");
-const services_1 = require("../../services");
+const auth_1 = require("@repo/auth");
 exports.authRouter = (0, express_1.Router)();
 exports.authRouter.post("/signin", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const parsedData = types_1.loginSchema.safeParse(req.body);
@@ -44,7 +44,7 @@ exports.authRouter.post("/signin", (req, res) => __awaiter(void 0, void 0, void 
             return;
         }
         // Generate a JWT token
-        const token = (0, services_1.generateLoginToken)(userFound);
+        const token = (0, auth_1.generateLoginToken)(userFound);
         res.status(200).json({ token, user: userFound });
         return;
     }
@@ -92,7 +92,7 @@ exports.authRouter.get("/me", (req, res) => __awaiter(void 0, void 0, void 0, fu
         res.status(403).json({ error: "Token is missing" });
         return;
     }
-    const decoded = (0, services_1.verifyToken)(token);
+    const decoded = (0, auth_1.verifyToken)(token);
     if (!decoded) {
         res.status(403).json({ error: "Token is invalid or expired" });
         return;
