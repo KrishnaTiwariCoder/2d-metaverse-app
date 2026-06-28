@@ -34,6 +34,7 @@ feat: user registration, login, and JWT auth
 - [ ] `POST /api/v1/admin/bootstrap` — one-time route, gated by `ADMIN_SECRET` env var, promotes first admin; disable after use
 - [x] `GET /api/v1/users/me` — current user profile
 - [x] `PUT /api/v1/users/me` — update username, avatarId
+- [x] Creating sessionId field in token, and storing sessions too in DB, active/inactive
 
 ---
 

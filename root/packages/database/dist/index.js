@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.returnObjectId = exports.user = exports.space = exports.map = exports.element = exports.avatar = exports.connectDB = void 0;
+exports.returnObjectId = exports.session = exports.user = exports.space = exports.map = exports.element = exports.avatar = exports.connectDB = void 0;
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
 const mongoose_1 = __importDefault(require("mongoose"));
@@ -80,9 +80,16 @@ const userSchema = new mongoose_1.default.Schema({
     password: { type: String, required: true },
     type: { type: String, enum: ["admin", "user"], default: "user" },
     avatarId: { type: mongoose_1.default.Schema.Types.ObjectId, ref: "Avatar" },
+    sessionId: { type: mongoose_1.default.Schema.Types.ObjectId, ref: "Session", default: null },
 }, { timestamps: true });
 const user = mongoose_1.default.model("User", userSchema);
 exports.user = user;
+const sessionSchema = new mongoose_1.default.Schema({
+    active: { type: Boolean, default: true },
+    userId: { type: mongoose_1.default.Schema.Types.ObjectId, ref: "User", required: true },
+}, { timestamps: true });
+const session = mongoose_1.default.model("Session", sessionSchema);
+exports.session = session;
 const returnObjectId = (id) => {
     return new mongoose_1.default.Types.ObjectId(id);
 };

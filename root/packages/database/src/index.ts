@@ -93,14 +93,26 @@ const userSchema = new mongoose.Schema(
     password: { type: String, required: true },
     type: { type: String, enum: ["admin", "user"], default: "user" },
     avatarId: { type: mongoose.Schema.Types.ObjectId, ref: "Avatar" },
+    sessionId: { type: mongoose.Schema.Types.ObjectId, ref: "Session", default: null },
   },
   { timestamps: true }
 );
 
 const user = mongoose.model("User", userSchema);
 
+const sessionSchema = new mongoose.Schema(
+  {
+    active: { type: Boolean, default: true },
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  },
+  { timestamps: true }
+);
+
+const session = mongoose.model("Session", sessionSchema);
+
+
 const returnObjectId = (id: string) => {
   return new mongoose.Types.ObjectId(id);
 };
 
-export { connectDB, avatar, element, map, space, user, returnObjectId };
+export { connectDB, avatar, element, map, space, user, session, returnObjectId };

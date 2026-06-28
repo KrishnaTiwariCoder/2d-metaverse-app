@@ -43,8 +43,11 @@ exports.authRouter.post("/signin", (req, res) => __awaiter(void 0, void 0, void 
             res.status(403).json({ error: "Invalid credentials" });
             return;
         }
+        const sessionData = yield database_1.session.create({ userId: userFound._id });
+        userFound.sessionId = sessionData._id;
+        yield userFound.save();
         // Generate a JWT token
-        const token = (0, auth_1.generateLoginToken)(userFound);
+        const token = (0, auth_1.generateLoginToken)(userFound, sessionData._id.toString());
         res.status(200).json({ token, user: userFound });
         return;
     }
@@ -97,6 +100,41 @@ exports.authRouter.get("/me", (req, res) => __awaiter(void 0, void 0, void 0, fu
         res.status(403).json({ error: "Token is invalid or expired" });
         return;
     }
+    const sessionData = yield database_1.session.findById(decoded.sessionId);
+    if (!sessionData || !sessionData.active) {
+        res.status(403).json({ error: "Session is invalid or expired" });
+        return;
+    }
     res.status(200).json({ user: decoded });
     return;
+}));
+exports.authRouter.post("/signout", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    const token = (_a = req.headers.authorization) === null || _a === void 0 ? void 0 : _a.split(" ")[1];
+    if (!token) {
+        res.status(403).json({ error: "Token is missing" });
+        return;
+    }
+    const decoded = (0, auth_1.verifyToken)(token);
+    if (!decoded) {
+        res.status(403).json({ error: "Token is invalid or expired" });
+        return;
+    }
+    try {
+        const sessionData = yield database_1.session.findById(decoded.sessionId);
+        if (!sessionData || !sessionData.active) {
+            res.status(403).json({ error: "Session is invalid or expired" });
+            return;
+        }
+        // Mark the session as inactive
+        sessionData.active = false;
+        yield sessionData.save();
+        res.status(200).json({ message: "Signed out successfully" });
+        return;
+    }
+    catch (err) {
+        console.error(err);
+        res.status(403).json({ error: "Internal server error" });
+        return;
+    }
 }));

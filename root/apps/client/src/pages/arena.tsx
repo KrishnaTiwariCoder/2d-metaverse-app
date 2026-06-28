@@ -20,6 +20,7 @@ import { Space } from "../redux/spaceSlice";
 import { setConnectionStatus, setError, setGameElements, setSpaceDimensions, setSpaceId } from "../redux/gameslice";
 import ElementBox from "../components/arena/elementbox";
 import { findSpaceById } from "../utils/spaces";
+import { logOut } from "../redux/authslice";
 
 const Arena = () => {
   const {id : spaceId} = useParams();
@@ -168,7 +169,9 @@ useEffect(() => {
   }, [players, myId, gameElements]);
 
   const space: Space | undefined = spaces.find((s: Space) => s.id === spaceId);
-  
+  const logOutBtn = async () => {
+    dispatch(logOut());
+  }   
   useEffect(() => { 
   
     findSpaceById(spaceId!).then((spaceData:any)=>{
@@ -195,11 +198,13 @@ useEffect(() => {
     <div className="flex flex-col w-full min-h-screen gap-4 p-4 bg-gray-900">
       {}
 
-      {/* <VoiceSection ws={localWsRef} /> */}
       <VoiceSection/>
       <div className="bg-gray-800 rounded-lg border border-gray-700 p-4">
         <div className={`mb-2 ${getStatusColor(connectionStatus)}`}>
-          Status: {connectionStatus}
+          Status: {connectionStatus} <br/>
+          Space: {space.name} <br/>
+          Space ID: {spaceId} <br/>
+          <button onClick={()=>logOutBtn()}>logout</button>
         </div>
         <div>{players.find((p: Player) => p.id === myId)?.name}</div>
       </div>

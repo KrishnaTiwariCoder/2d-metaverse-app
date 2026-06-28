@@ -6,11 +6,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.verifyToken = exports.generateLoginToken = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const constants_1 = require("./constants");
-const generateLoginToken = (data) => {
+const generateLoginToken = (data, sessionId) => {
     return jsonwebtoken_1.default.sign({
         _id: data._id,
         username: data.username,
         type: data.type,
+        sessionId: sessionId,
     }, process.env.JWT_SECRET || constants_1.JWT_SECRET);
 };
 exports.generateLoginToken = generateLoginToken;
@@ -20,7 +21,6 @@ const verifyToken = (token) => {
         return decoded;
     }
     catch (err) {
-        console.error(err);
         return null;
     }
 };

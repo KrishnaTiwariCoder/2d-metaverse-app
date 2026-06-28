@@ -1,4 +1,5 @@
 import { createSlice , PayloadAction } from "@reduxjs/toolkit";
+import { signout } from "../utils/auth";
 
 // Define the type for state
 interface AuthState {
@@ -44,6 +45,7 @@ const authSlice = createSlice({
     },
     logOut:()=>{
       localStorage.removeItem("token");
+      signout();
       return initialState;
     }
   },

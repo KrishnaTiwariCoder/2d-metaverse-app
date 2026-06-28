@@ -1,12 +1,20 @@
-import jwt from "jsonwebtoken";
+import jwt , {JwtPayload} from "jsonwebtoken";
 import { JWT_SECRET } from "./constants";
 
-const generateLoginToken = (data: any) => {
+interface TokenPayload extends JwtPayload {
+  _id: string;
+  username: string;
+  type: "admin" | "user";
+  sessionId: string;
+}
+
+const generateLoginToken = (data: any , sessionId: string) => {
   return jwt.sign(
     {
       _id: data._id,
       username: data.username,
       type: data.type,
+      sessionId: sessionId,
     },
     process.env.JWT_SECRET || JWT_SECRET
   );
@@ -14,13 +22,13 @@ const generateLoginToken = (data: any) => {
 
  const verifyToken = (token: string) => {
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || JWT_SECRET);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || JWT_SECRET) as TokenPayload;
     return decoded;
   } catch (err) {
-    console.error(err);
     return null;
   }
 };
+
 
 
 export { generateLoginToken, verifyToken };
