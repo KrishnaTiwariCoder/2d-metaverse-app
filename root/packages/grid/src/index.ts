@@ -128,11 +128,10 @@ export class SpatialGrid {
     });
   }
 
-  /** Removes an element placement from the grid. No-ops if not present. */
   removeElement(instanceId: string): void {
     const stored = this.elements.get(instanceId);
     if (!stored) return;
-
+    console.log(this.elementCells , instanceId , stored.cellKeys , "-----------------------------------------");
     this.removeFromCells(this.elementCells, instanceId, stored.cellKeys);
     this.elements.delete(instanceId);
   }

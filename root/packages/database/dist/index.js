@@ -65,6 +65,7 @@ const spaceSchema = new mongoose_1.default.Schema({
             id: { type: mongoose_1.default.Schema.Types.ObjectId, ref: "Element" },
             x: Number,
             y: Number,
+            instanceId: { type: String },
             statics: Boolean,
         },
     ],

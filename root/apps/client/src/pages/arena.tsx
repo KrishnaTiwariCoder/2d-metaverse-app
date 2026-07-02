@@ -19,6 +19,7 @@ import { Player } from "../redux/playerslice";
 import { Space } from "../redux/spaceSlice";
 import { setConnectionStatus, setError, setGameElements, setSpaceDimensions, setSpaceId } from "../redux/gameslice";
 import ElementBox from "../components/arena/elementbox";
+import RemoveElement from "../components/arena/removeelement";
 import { findSpaceById } from "../utils/spaces";
 import { logOut } from "../redux/authslice";
 
@@ -180,7 +181,8 @@ useEffect(() => {
           return {
             element: el.id,
             x: el.x,
-            y: el.y
+            y: el.y,
+            instanceId: el.instanceId
           }
         })
         dispatch(setGameElements(elementsWithData));
@@ -209,7 +211,7 @@ useEffect(() => {
         <div>{players.find((p: Player) => p.id === myId)?.name}</div>
       </div>
       <div className="flex-1 bg-gray-800 rounded-lg border border-gray-700">
-        <div className="flex items-center justify-center w-full h-full min-h-[400px] p-4">
+        <div className="flex items-center justify-center w-full h-full min-h-[400px] p-4 ">
 
           <div className="flex flex-col md:flex-row w-full h-full gap-4">
           <Canvas canvasRef={canvasRef} wsRef={localWsRef}/>
@@ -219,11 +221,14 @@ useEffect(() => {
             <ChatRoom wsRef={localWsRef} />
           </div>
 
-          <div className=" bottom-2 right-2 flex gap-2">
+          <div className=" bottom-2 right-2 flex gap-2 ">
           {
             // if space is owned by the user then show the element box
-            space.creator._id === myId && (
-              <ElementBox wsRef={localWsRef} /> )
+            space.creator._id === myId && (<div className="bottom-2 right-2 flex gap-2">
+            <ElementBox wsRef={localWsRef} /> 
+            <RemoveElement wsRef={localWsRef} />
+            </div>
+            )
 
           }
           </div>

@@ -153,9 +153,8 @@ feat: broadcast element placement changes to visitors in real time
 ```
 
 - [x] When owner calls `POST /placements` → broadcast `placement:added` to space
-- [~] When owner calls `PUT /placements/:id` → broadcast `placement:moved` to space
-- [~] When owner calls `DELETE /placements/:id` → broadcast `placement:removed` to space
-- [ ] Rebuild collision grid on each placement change
+- [x] When owner calls `DELETE /placements/:id` → broadcast `placement:removed` to space
+- [x] Rebuild collision grid on each placement change
 
 ---
 

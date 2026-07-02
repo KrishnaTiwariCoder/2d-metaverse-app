@@ -282,7 +282,7 @@ export class User {
               });
               return;
             }
-
+            console.log(`Attempting to add element: ${elementId} at (${x}, ${y}) with dimensions (${template.width}x${template.height})`);
             const grid = RoomManager.getInstance().getGrid(this.spaceId!);
             
 
@@ -299,9 +299,9 @@ export class User {
             const statics = template.statics ?? true;
 
             grid.addElement(instanceId, x, y, template.width, template.height, statics , elementId);
-
+            console.log(`Element added: ${elementId} at (${x}, ${y}) with instanceId: ${instanceId}`);
             await space.findByIdAndUpdate(this.spaceId, {
-              $push: { elements: { id: elementId, x, y, statics } },
+              $push: { elements: { id: elementId, x, y, statics , instanceId} },
             });
 
             RoomManager.getInstance().broadcast(
@@ -314,11 +314,35 @@ export class User {
             );
 
             this.send({
-              type: "element-added-self",
+              type: "element-added",
               payload: { elementId, instanceId, x, y },
             });
             break;
           }
+          case "element-removed": {
+            const { instanceId } = parsedData.payload;
+            const grid = RoomManager.getInstance().getGrid(this.spaceId!);
+            console.log(`Attempting to remove element with instanceId: ${instanceId}`);
+            grid.removeElement(instanceId);
+            RoomManager.getInstance().broadcast(
+              {
+                type: "element-removed",
+                payload: { instanceId },
+              },
+              this,
+              this.spaceId!
+            );
+            this.send({
+              type: "element-removed",
+              payload: { instanceId },
+            });
+            await space.findByIdAndUpdate(this.spaceId, {
+              $pull: { elements: { instanceId } },
+            });
+            break;
+          } 
+          default:
+            console.log("Unknown message type:", parsedData.type);
         }
       });
     } catch (error) {

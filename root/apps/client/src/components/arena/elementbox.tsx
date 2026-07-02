@@ -1,15 +1,13 @@
 import React, { useState } from 'react';
-import {   useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { Element } from '../../redux/elementSlice';
-// import { addGameElement } from '../../redux/gameslice';
-// import { addElementToSpace } from '../../utils/spaces';
+
 
 
 export default function ElementBox({ wsRef }: { wsRef: React.RefObject<WebSocket> }) {
   const { width, height } = useSelector((state: any) => state.game.spaceDimensions);
   const elements = useSelector((state: any) => state.elements.elements);
-  // const spaceId = useSelector((state: any) => state.game.spaceId);
-  // const dispatch = useDispatch();
+
 
   const [selectedItem, setSelectedItem] = useState<Element | null>(null);
   const [coordX, setCoordX] = useState<string>('');
@@ -30,15 +28,17 @@ export default function ElementBox({ wsRef }: { wsRef: React.RefObject<WebSocket
       payload: {
         elementId: element.itemId,
         x: element.x,
-        y: element.y
+        y: element.y,
       }
     }));
+    console.log('Selected item:', selectedItem);
     
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedItem) return;
+
 
     const xVal = Number(coordX);
     const yVal = Number(coordY);
@@ -94,9 +94,6 @@ export default function ElementBox({ wsRef }: { wsRef: React.RefObject<WebSocket
                   : 'bg-slate-900/50 border-slate-800/80 hover:bg-slate-800/60 hover:border-slate-700 text-slate-300'
               }`}
             >
-              {/* <span className="text-2xl mr-3 bg-slate-900 p-2 rounded-lg border border-slate-800">
-                {item.imageUrl}
-              </span> */}
                 <img
                   src={item.imageUrl}
                   alt={item.name}

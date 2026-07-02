@@ -154,7 +154,7 @@ spaceRouter.post("/element", async (req, res) => {
       return;
     }
     console.log(elementId, spaceId, x, y);
-    spaceFound.elements.push({ id:elementId , x, y });
+    spaceFound.elements.push({ id:elementId , x, y , instanceId: req.body.instanceId });
 
     await spaceFound.save();
 

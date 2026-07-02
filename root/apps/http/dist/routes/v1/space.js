@@ -159,7 +159,7 @@ exports.spaceRouter.post("/element", (req, res) => __awaiter(void 0, void 0, voi
             return;
         }
         console.log(elementId, spaceId, x, y);
-        spaceFound.elements.push({ id: elementId, x, y });
+        spaceFound.elements.push({ id: elementId, x, y, instanceId: req.body.instanceId });
         yield spaceFound.save();
         res.status(200).json({ message: "Element added to space successfully", element: elementFound });
     }

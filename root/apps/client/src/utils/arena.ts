@@ -2,7 +2,6 @@ import store, { appDispatch } from "../redux/store";
 import { Message, receive } from "../redux/chatslice";
 
 import {
-  addGameElement,
   Player,
   setCurrentPosition,
   setError,
@@ -105,6 +104,7 @@ export const handleServerMessage = (message: any) => {
     }
     case "element-add-rejected": {
       appDispatch(setError(message.payload.reason));
+      alert(`Element add rejected: ${message.payload.reason}`);
       break;
     }
     case "element-added": { 
@@ -116,18 +116,19 @@ export const handleServerMessage = (message: any) => {
             element: store.getState().elements.elements.find((e: any) => e._id === message.payload.elementId)!,
             x: message.payload.x,
             y: message.payload.y,
+            instanceId: message.payload.instanceId
           },
         ])
       );
       break;
     }
-    case "element-added-self": {
+    case "element-removed": {
       appDispatch(setError(''));
-      appDispatch(addGameElement({
-        element: store.getState().elements.elements.find((e: any) => e._id === message.payload.elementId)!,
-        x: message.payload.x,
-        y: message.payload.y
-      }));
+      appDispatch(
+        setGameElements(
+          store.getState().game.elements.filter((e: any) => e.instanceId !== message.payload.instanceId)
+        )
+      );
       break;
     }
   }

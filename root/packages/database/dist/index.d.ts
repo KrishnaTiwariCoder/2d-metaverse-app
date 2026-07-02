@@ -279,16 +279,19 @@ declare const space: mongoose.Model<{
         statics?: boolean | null | undefined;
         x?: number | null | undefined;
         y?: number | null | undefined;
+        instanceId?: string | null | undefined;
     }, mongoose.Types.Subdocument<mongoose.Types.ObjectId, any, {
         id?: mongoose.Types.ObjectId | null | undefined;
         statics?: boolean | null | undefined;
         x?: number | null | undefined;
         y?: number | null | undefined;
+        instanceId?: string | null | undefined;
     }> & {
         id?: mongoose.Types.ObjectId | null | undefined;
         statics?: boolean | null | undefined;
         x?: number | null | undefined;
         y?: number | null | undefined;
+        instanceId?: string | null | undefined;
     }>;
     thumbnail?: string | null | undefined;
     createdBy?: mongoose.Types.ObjectId | null | undefined;
@@ -305,16 +308,19 @@ declare const space: mongoose.Model<{
         statics?: boolean | null | undefined;
         x?: number | null | undefined;
         y?: number | null | undefined;
+        instanceId?: string | null | undefined;
     }, mongoose.Types.Subdocument<mongoose.Types.ObjectId, any, {
         id?: mongoose.Types.ObjectId | null | undefined;
         statics?: boolean | null | undefined;
         x?: number | null | undefined;
         y?: number | null | undefined;
+        instanceId?: string | null | undefined;
     }> & {
         id?: mongoose.Types.ObjectId | null | undefined;
         statics?: boolean | null | undefined;
         x?: number | null | undefined;
         y?: number | null | undefined;
+        instanceId?: string | null | undefined;
     }>;
     thumbnail?: string | null | undefined;
     createdBy?: mongoose.Types.ObjectId | null | undefined;
@@ -331,16 +337,19 @@ declare const space: mongoose.Model<{
         statics?: boolean | null | undefined;
         x?: number | null | undefined;
         y?: number | null | undefined;
+        instanceId?: string | null | undefined;
     }, mongoose.Types.Subdocument<mongoose.Types.ObjectId, any, {
         id?: mongoose.Types.ObjectId | null | undefined;
         statics?: boolean | null | undefined;
         x?: number | null | undefined;
         y?: number | null | undefined;
+        instanceId?: string | null | undefined;
     }> & {
         id?: mongoose.Types.ObjectId | null | undefined;
         statics?: boolean | null | undefined;
         x?: number | null | undefined;
         y?: number | null | undefined;
+        instanceId?: string | null | undefined;
     }>;
     thumbnail?: string | null | undefined;
     createdBy?: mongoose.Types.ObjectId | null | undefined;
@@ -363,16 +372,19 @@ declare const space: mongoose.Model<{
         statics?: boolean | null | undefined;
         x?: number | null | undefined;
         y?: number | null | undefined;
+        instanceId?: string | null | undefined;
     }, mongoose.Types.Subdocument<mongoose.Types.ObjectId, any, {
         id?: mongoose.Types.ObjectId | null | undefined;
         statics?: boolean | null | undefined;
         x?: number | null | undefined;
         y?: number | null | undefined;
+        instanceId?: string | null | undefined;
     }> & {
         id?: mongoose.Types.ObjectId | null | undefined;
         statics?: boolean | null | undefined;
         x?: number | null | undefined;
         y?: number | null | undefined;
+        instanceId?: string | null | undefined;
     }>;
     thumbnail?: string | null | undefined;
     createdBy?: mongoose.Types.ObjectId | null | undefined;
@@ -389,16 +401,19 @@ declare const space: mongoose.Model<{
         statics?: boolean | null | undefined;
         x?: number | null | undefined;
         y?: number | null | undefined;
+        instanceId?: string | null | undefined;
     }, mongoose.Types.Subdocument<mongoose.Types.ObjectId, any, {
         id?: mongoose.Types.ObjectId | null | undefined;
         statics?: boolean | null | undefined;
         x?: number | null | undefined;
         y?: number | null | undefined;
+        instanceId?: string | null | undefined;
     }> & {
         id?: mongoose.Types.ObjectId | null | undefined;
         statics?: boolean | null | undefined;
         x?: number | null | undefined;
         y?: number | null | undefined;
+        instanceId?: string | null | undefined;
     }>;
     thumbnail?: string | null | undefined;
     createdBy?: mongoose.Types.ObjectId | null | undefined;
@@ -415,16 +430,19 @@ declare const space: mongoose.Model<{
         statics?: boolean | null | undefined;
         x?: number | null | undefined;
         y?: number | null | undefined;
+        instanceId?: string | null | undefined;
     }, mongoose.Types.Subdocument<mongoose.Types.ObjectId, any, {
         id?: mongoose.Types.ObjectId | null | undefined;
         statics?: boolean | null | undefined;
         x?: number | null | undefined;
         y?: number | null | undefined;
+        instanceId?: string | null | undefined;
     }> & {
         id?: mongoose.Types.ObjectId | null | undefined;
         statics?: boolean | null | undefined;
         x?: number | null | undefined;
         y?: number | null | undefined;
+        instanceId?: string | null | undefined;
     }>;
     thumbnail?: string | null | undefined;
     createdBy?: mongoose.Types.ObjectId | null | undefined;

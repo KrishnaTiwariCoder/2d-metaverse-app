@@ -1,6 +1,6 @@
 import { createSlice , PayloadAction } from "@reduxjs/toolkit";
 import { Element } from "./elementSlice";
-import { addElementToSpace } from "../utils/spaces";
+// import { addElementToSpace } from "../utils/spaces";
 export interface Player {
   id: string;
   x: number; // spawn.x
@@ -25,6 +25,7 @@ interface GameState {
     element: Element;
     x: number;
     y: number;
+    instanceId?: string;
   }[];
 }
 
@@ -67,17 +68,17 @@ const gameSlice = createSlice({
     setCurrentPosition: (state, action:PayloadAction<any>) => {
       state.currentPosition = action.payload;
     },
-    addGameElement: (state, action:PayloadAction<{element: Element; x: number; y: number}>) => {
+    addGameElement: (state, action:PayloadAction<{element: Element; x: number; y: number , instanceId: string}>) => {
       state.elements.push(action.payload);
-      addElementToSpace(state.spaceId, action.payload)
-      .then(response => {
-      if(response.status==200){
-        console.log('Element added to space:', response);
-      }
-      })
-      .catch(error => {
-      console.error('Error adding element to space:', error);
-      });
+      // addElementToSpace(state.spaceId, action.payload)
+      // .then(response => {
+      // if(response.status==200){
+      //   console.log('Element added to space:', response);
+      // }
+      // })
+      // .catch(error => {
+      // console.error('Error adding element to space:', error);
+      // });
     }
   },
 });
