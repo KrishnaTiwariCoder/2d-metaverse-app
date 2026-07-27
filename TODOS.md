@@ -188,6 +188,110 @@ feat: in-space element placement editor for space owners
 
 ---
 
+## v0.12.1 — Admin App: Bootstrap & Auth
+
+```
+feat: standalone admin dashboard — scaffold, routing, and admin login
+```
+
+> Separate Vite + React app at `apps/admin`. Only accessible to users with `role === 'admin'`.
+> Shares types from `packages/shared`. Has its own login page — does not share auth state with the user client.
+
+- [ ] Scaffold `apps/admin` in TurboRepo (`vite`, `react`, `react-router-dom`, `tailwindcss`)
+- [ ] Configure `turbo.json` to include `admin` in the pipeline
+- [ ] Admin login page — `POST /api/v1/auth/login`, persist JWT in `localStorage`
+- [ ] `requireAdmin` guard: redirect to `/login` if token missing or role is not `admin`
+- [ ] Base layout: left sidebar nav (Elements, Avatars, Maps, Users) + main content area
+- [ ] Axios instance with `Authorization: Bearer <token>` header and 401 auto-redirect
+- [ ] Error boundary + toast notification system (invalid saves, API errors)
+
+---
+
+## v0.12.2 — Admin App: Element Catalogue Manager
+
+```
+feat: admin UI to create, edit, and delete elements from the catalogue
+```
+
+- [ ] **Elements list page** — table with thumbnail, name, type, dimensions, static flag, actions
+- [ ] **Create element form**
+  - [ ] Fields: `name`, `type` (dropdown: chair / table / computer / counter / focus-zone / decor), `width`, `height`, `static` (toggle)
+  - [ ] Image upload input — uploads to `/public/assets/elements/`, stores URL in DB
+  - [ ] Live preview: show uploaded image at declared `width × height`
+  - [ ] Submit → `POST /api/v1/admin/elements`
+- [ ] **Edit element** — same form pre-populated, submit → `PUT /api/v1/admin/elements/:id`
+- [ ] **Delete element** — confirm dialog; blocked with error toast if element is in use by any space
+- [ ] Image upload endpoint: `POST /api/v1/admin/upload/element` (multer, serve from `/public`)
+
+---
+
+## v0.12.3 — Admin App: Avatar Catalogue Manager
+
+```
+feat: admin UI to create, edit, and delete avatars from the catalogue
+```
+
+- [ ] **Avatars list page** — grid of avatar previews with name, frame size, actions
+- [ ] **Create avatar form**
+  - [ ] Fields: `name`, `frameWidth`, `frameHeight`
+  - [ ] Sprite sheet upload → `POST /api/v1/admin/upload/avatar`
+  - [ ] Preview: render first frame of sprite sheet using a clipped `<canvas>` at declared frame size
+  - [ ] Submit → `POST /api/v1/admin/avatars`
+- [ ] **Edit avatar** — pre-populated form, submit → `PUT /api/v1/admin/avatars/:id`
+- [ ] **Delete avatar** — confirm dialog
+
+---
+
+## v0.12.4 — Admin App: Map Builder
+
+```
+feat: admin UI to create maps with a visual tile editor and pre-placed default elements
+```
+
+> This is the most complex admin screen. A map has: dimensions, a background tileset image, a
+> collision grid (which tiles block movement), a spawn point, and optionally a set of
+> pre-placed default elements (so every space created from this map starts with furniture already in it).
+
+- [ ] **Maps list page** — cards with thumbnail, name, dimensions, element count, actions
+- [ ] **Create / Edit map — step 1: metadata**
+  - [ ] Fields: `name`, `width` (tiles), `height` (tiles), tile size (px, default 40)
+  - [ ] Background image upload → `POST /api/v1/admin/upload/map`
+  - [ ] Background preview rendered on a `<canvas>` scaled to fit the panel
+- [ ] **Create / Edit map — step 2: collision grid painter**
+  - [ ] Render the uploaded background on canvas at full tile grid resolution
+  - [ ] Overlay transparent tile grid
+  - [ ] Click or drag to toggle tiles between **walkable** (transparent) and **blocked** (red overlay)
+  - [ ] Shift+click to set **spawn point** (green tile marker; only one allowed)
+  - [ ] Collision state stored as a flat `boolean[]` array, serialised to base64 on save
+  - [ ] Undo / redo (Ctrl+Z / Ctrl+Shift+Z) for tile paint operations
+- [ ] **Create / Edit map — step 3: default element placement**
+  - [ ] Same canvas view as step 2 but in element-placement mode
+  - [ ] Left panel lists all catalogue elements with thumbnail + name
+  - [ ] Click element in panel → cursor becomes placement ghost (element image follows mouse)
+  - [ ] Click tile on canvas → place element; blocked if tile is in collision grid
+  - [ ] Click placed element → highlight + show remove button
+  - [ ] Placed elements stored as `{ elementId, x, y }[]` on the map document
+  - [ ] These become the initial placements for any space created from this map
+- [ ] Submit (all 3 steps) → `POST /api/v1/admin/maps` or `PUT /api/v1/admin/maps/:id`
+- [ ] **Delete map** — confirm dialog; blocked if any active space uses it
+
+---
+
+## v0.12.5 — Admin App: User Management
+
+```
+feat: admin UI to view users and manage roles
+```
+
+- [ ] **Users list page** — table: username, email, role badge, joined date, actions
+- [ ] Search / filter by username or email
+- [ ] **Promote to admin** — confirm dialog → `PATCH /api/v1/admin/users/:id/role`
+- [ ] **Ban user** — sets `banned: true`; banned users rejected at WS connect and login
+- [ ] Pagination (20 per page)
+
+---
+
+
 ## v0.13.0 — Proximity Detection
 
 ```
